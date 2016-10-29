@@ -1,5 +1,14 @@
 <?php
 abstract class Vhost extends \Plugin{
+ final public function getResponseError($http_code){
+  $data = "
+<html>
+ <body>
+  <h1>".$http_code." ".\Util\Convert::statusCodeToText($http_code)."</h1>
+ </body>
+</html>";
+  return new \Server\Response($data,$http_code,null);
+ }
  public function onPhpRequestChoice(\Server\Request $request){
   return \preg_match("/.*\.php$/",$request->getUrl());
  }
@@ -25,15 +34,6 @@ abstract class Vhost extends \Plugin{
    }
   }
   return null;
- }
- public function getResponseError($http_code){
-  $data = "
-<html>
- <body>
-  <h1>".$http_code." ".\Util\Convert::statusCodeToText($http_code)."</h1>
- </body>
-</html>";
-  return new \Server\Response($http_code,null,$data);
  }
  private function getDirectoryContent(\Server\Request $request,$static_data_dir){
   $index = $this->getIndexInDirectory($static_data_dir);

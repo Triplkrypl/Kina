@@ -26,7 +26,7 @@ class Server{
   $this->log->log("Loading all Vhosts");
   $this->vhost_storige->loadAll();
   if(is_null($this->vhost_storige->getBase())){
-   $this->log->log("Nepodarilo se najit Base vhost!");
+   $this->log->log("Base vhost not found!","error");
    return false;
   }
   return true;
@@ -53,7 +53,7 @@ class Server{
   return true;
  }
  private function clientConnect($client_socket){
-  $client_handler = new \Client\Handler($client_socket,$this->vhost_storige,$this->error_handler,$this->clients,$this->config);
+  $client_handler = new \Client\Handler($client_socket,$this->vhost_storige,$this->error_handler,$this->clients,$this->config,$this->log);
   $client_handler->start();
   $client_handler->detach();
   $client_handler = null;

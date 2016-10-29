@@ -7,13 +7,15 @@ class Handler extends \Thread{
  private $clients;
  private $socket;
  private $config;
- public function __construct($socket,\Util\PluginStorige $vhost_storige,\Util\ErrorHandler $error_handler,\Threaded $clients,\Server\Config $config){
+ private $log;
+ public function __construct($socket,\Util\PluginStorige $vhost_storige,\Util\ErrorHandler $error_handler,\Threaded $clients,\Server\Config $config,\Util\Log $log){
   $this->client = new Client($socket);
   $this->socket = $socket;
   $this->vhost_storige = $vhost_storige;
   $this->error_handler = $error_handler;
   $this->clients = $clients;
   $this->config = $config;
+  $this->log = $log;
  }
  public function __destruct(){
  }
@@ -23,7 +25,12 @@ class Handler extends \Thread{
   \date_default_timezone_set("Europe/Prague");
   $this->clients[] = $this->socket;
   foreach($this->vhost_storige->getAll() as $vhost){
-   $vhost->onClientConnect($this->client);
+   try{
+    $vhost->onClientConnect($this->client);
+   }
+   catch(\Exception $e){
+    $this->log->logException("Plugin ".$vhost->getName()." throw exception from onClientConnect",$e,"warning");
+   }
    $vhost = null;
   }
   while(1){
@@ -35,7 +42,12 @@ class Handler extends \Thread{
  }
  private function clientDisconnect(){
   foreach($this->vhost_storige->getAll() as $vhost){
-   $vhost->onClientDisconnect($this->client);
+   try{
+    $vhost->onClientDisconnect($this->client);
+   }
+   catch(\Exception $e){
+    $this->log->logException("Plugin ".$vhost->getName()." throw exception from onClientDisconnect",$e,"warning");
+   }
    $vhost = null;
   }
   foreach($this->clients as $key=>$client){
@@ -51,7 +63,14 @@ class Handler extends \Thread{
  private function selectVhost(\Server\Request $request){
   if($this->config->get("vhost_self_select")){
    foreach($this->vhost_storige->getAll() as $vhost){
-    if($vhost->onVhostChoise($request)){
+    try{
+     $result = $vhost->onVhostChoise($request);
+    }
+    catch(\Exception $e){
+     $this->log->logException("Plugin ".$vhost->getName()." throw exception from onVhostChoise",$e,"warning");
+     continue;
+	}
+    if($result){
      return $vhost;
     }
    }
@@ -59,6 +78,34 @@ class Handler extends \Thread{
    //todo!!!!!!!!!!!!!!!add config rule
   }
   return null;
+ }
+ private function handleRequest(\Server\Request $request){
+  $vhost = $this->selectVhost($request);
+  if(is_null($vhost)){
+   $vhost = $this->vhost_storige->getBase();
+  }
+  try{
+   $result = $vhost->onPhpRequestChoice($request);
+  }
+  catch(\Exception $e){
+   $this->log->logException("Plugin ".$vhost->getName()." throw exception from onPhpRequestChoice",$e,"warning");
+   return $vhost->getResponseError(500);
+  }
+  $methotd = "onNoPhpRequest";
+  if($result){
+   $methotd = "onPhpRequest";
+  }
+  try{
+   $response = $vhost->$methotd($this->client,$request);
+  }
+  catch(\Exception $e){
+   $this->log->logException("Plugin ".$vhost->getName()." throw exception from ".$methotd,$e,"warning");
+   return $vhost->getResponseError(500);
+  }
+  if(is_null($response)){
+   return $vhost->getResponseError(404);
+  }
+  return $response;
  }
  private function handle(){
   $request_info = null; $header = null; $temp_message = null;
@@ -83,19 +130,7 @@ class Handler extends \Thread{
    $query = $url[1];
   }
   $request = new \Server\Request($request_info[0],$header->getData("Host"),$url[0],$header,new \Server\Request\Data($query),$body);
-  $vhost = $this->selectVhost($request);
-  if(is_null($vhost)){
-   $vhost = $this->vhost_storige->getBase();
-  }
-  $response = null;
-  if($vhost->onPhpRequestChoice($request)){
-   $response = $vhost->onPhpRequest($this->client,$request);
-  }else{
-   $response = $vhost->onNoPhpRequest($this->client,$request);
-  }
-  if(is_null($response)){
-   $response = $vhost->getResponseError(404);
-  }
+  $response = $this->handleRequest($request);
   $data = $http_version." ".$response->getStatusCode()." ".\Util\Convert::statusCodeToText($response->getStatusCode())."\r\n";
   $header = $response->getHeader();
   if(is_null($header)){

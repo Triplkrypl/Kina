@@ -29,21 +29,36 @@ class PluginStorige{
  }
  private function remove(\Plugin $plugin){
   $this->log->log("Exiting plugin: ".$plugin->getName());
-  $plugin->onExit();
+  try{
+   $plugin->onExit();
+  }
+  catch(\Exception $e){
+   $this->log->logException("Plugin trow exception onExiting",$e,"warning");
+  }
   unset($this->data[$plugin->getName()]);
  }
  private function load($plugin_name){
   $this->log->log("Loading Plugin: ".$plugin_name);
   $main_plugin_class = $plugin_name."\\".$this->type;
   if(!class_exists($main_plugin_class)){
-   $this->log->log("Plugin not found, class: ".$main_plugin_class." not exists");
+   $this->log->log("Plugin not found, class: ".$main_plugin_class." not exists","warning");
+   return false;
+  }
+  if(get_parent_class($main_plugin_class) != $this->type){
+   $this->log->log("Plugin not found, class: ".$main_plugin_class." not extend class: ".$this->type,"warning");
    return false;
   }
   if(array_key_exists($plugin_name,$this->data)){
    return true;
   }
   $plugin = new $main_plugin_class($this->config,$this->data_dir);
-  $plugin->onLoad();
+  try{
+   $plugin->onLoad();
+  }
+  catch(\Exception $e){
+   $this->log->logException("Plugin trow exception onLoading",$e,"warning");
+   return false;
+  }
   $this->data[$plugin_name] = $plugin;
   return true;
  }

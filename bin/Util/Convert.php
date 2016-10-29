@@ -17,6 +17,7 @@ class Convert{
    200 => "OK",
    404 => "Not found",
    403 => "Forbidden",
+   500 => "Internal server error",
   );
   if(array_key_exists($code,$codes)){
    return $codes[$code];
