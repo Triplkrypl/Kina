@@ -1,5 +1,4 @@
 <?php
-namespace Vhost;
 abstract class Vhost extends \Plugin{
  public function onPhpRequestChoice(\Server\Request $request){
   return \preg_match("/.*\.php$/",$request->getUrl());
