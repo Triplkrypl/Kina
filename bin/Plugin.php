@@ -15,7 +15,7 @@ abstract class Plugin{
   return $this->data_dir;
  }
  final public function getName(){
-  return \get_class($this);
+  return \preg_replace("/\\\\.*$/","",\get_class($this));
  }
  abstract public function onLoad();
  abstract public function onExit();

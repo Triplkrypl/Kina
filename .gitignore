@@ -1,4 +1,4 @@
 data/*
 !data/.gitkeep
-vhost/*
-!vhost/.gitkeep
+plugin/*
+!plugin/.gitkeep

@@ -2,31 +2,26 @@
 namespace Client;
 class Handler extends \Thread{
  private $vhost_storige;
+ private $error_handler;
  private $client;
  private $clients;
  private $socket;
  private $config;
- public function __construct($socket,\Util\PluginStorige $vhost_storige,\Threaded $clients,\Server\Config $config){
+ public function __construct($socket,\Util\PluginStorige $vhost_storige,\Util\ErrorHandler $error_handler,\Threaded $clients,\Server\Config $config){
   $this->client = new Client($socket);
   $this->socket = $socket;
   $this->vhost_storige = $vhost_storige;
+  $this->error_handler = $error_handler;
   $this->clients = $clients;
   $this->config = $config;
  }
  public function __destruct(){
  }
  public function run(){
-  \spl_autoload_register("\Util\ClassLoader::loadClass");
+  $this->vhost_storige->getClassLoader()->register();
+  $this->error_handler->register();
   \date_default_timezone_set("Europe/Prague");
   $this->clients[] = $this->socket;
-  var_dump("Seznam clientu");
-  var_dump($this->clients);
-  /*foreach($this->clients as $c){
-   $c = new Client($c);
-   var_dump($c);
-   $c = null;
-  }*/
-  $this->vhost_storige->checkAllPlugin();
   foreach($this->vhost_storige->getAll() as $vhost){
    $vhost->onClientConnect($this->client);
    $vhost = null;
@@ -39,7 +34,6 @@ class Handler extends \Thread{
   $this->clientDisconnect();
  }
  private function clientDisconnect(){
-  $this->vhost_storige->checkAllPlugin();
   foreach($this->vhost_storige->getAll() as $vhost){
    $vhost->onClientDisconnect($this->client);
    $vhost = null;
@@ -62,7 +56,7 @@ class Handler extends \Thread{
     }
    }
   }else{
-   //!!!!!!!!!!!!!!!add config rule
+   //todo!!!!!!!!!!!!!!!add config rule
   }
   return null;
  }
@@ -89,10 +83,9 @@ class Handler extends \Thread{
    $query = $url[1];
   }
   $request = new \Server\Request($request_info[0],$header->getData("Host"),$url[0],$header,new \Server\Request\Data($query),$body);
-  $this->vhost_storige->checkAllPlugin();
   $vhost = $this->selectVhost($request);
   if(is_null($vhost)){
-   $vhost = $this->vhost_storige->getDefault();
+   $vhost = $this->vhost_storige->getBase();
   }
   $response = null;
   if($vhost->onPhpRequestChoice($request)){

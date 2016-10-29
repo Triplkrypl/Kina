@@ -3,7 +3,7 @@ namespace Server;
 class Config{
  private $data;
  private $default_value = array(
-  "port" => 7505,
+  "ports" => array(7505,7506),
   "max_connection" => 100000,
   "keep_alive_connection_time_out" => 20,
   "directory_file_list" => false,

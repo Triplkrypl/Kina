@@ -1,64 +1,70 @@
 <?php
 class Server{
- private $port;
+ private $ports;
  private $log;
+ private $error_handler;
  private $socket;
  private $console;
  private $max_connection;
  private $clients;
  private $vhost_storige;
+ private $plugin_storige;
  private $config;
- public function __construct(\Server\Config $config,\Util\ClassLoader $class_loader,$data_dir){
+ public function __construct(\Server\Config $config,\Util\ClassLoader $class_loader,\Util\ErrorHandler $error_handler,$data_dir){
   $this->config = $config;
-  $this->port = $this->config->get("port");
+  $this->ports = $this->config->get("ports");
   $this->max_connection = $this->config->get("max_connection");
   $this->log = new \Util\Log();
-  $this->vhost_storige = new \Util\PluginStorige($config,$this->log,$class_loader,$data_dir,\Util\ClassLoader::TYPE_VHOST);
+  $this->error_handler = $error_handler;
+  $this->vhost_storige = new \Util\PluginStorige($config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_VHOST);
+  $this->plugin_storige = new \Util\PluginStorige($config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_PLUGIN);
   $this->socket = null;
   $this->clients = new \Threaded();
   $this->console = new \Console($this->clients,$this->vhost_storige);
  }
  public function loadVhosts(){
-  //$this->vhost_storige->loadAll();
-  $this->vhost_storige->load('Base');
-  if(is_null($this->vhost_storige->getDefault())){
-   $this->log->log("Nepodarilo se najit defaultni vhost!");
+  $this->log->log("Loading all Vhosts");
+  $this->vhost_storige->loadAll();
+  if(is_null($this->vhost_storige->getBase())){
+   $this->log->log("Nepodarilo se najit Base vhost!");
    return false;
   }
   return true;
+ }
+ public function loadPlugins(){
+  $this->log->log("Loading all Plugins");
+  $this->plugin_storige->loadAll();
  }
  public function run(){
-  $this->log->log("Starting server on port: ".$this->port);
-  if(!$this->tcpInit()){
-   $this->socket = null;
-   $this->log->log("Selhalo vytvareni tcp serveru!");
-   return false;
-  }
-  return true;
- }
- private function tcpInit(){
-  $errno = null;
-  $errstr = null;
-  $this->socket = \stream_socket_server("tcp://0.0.0.0:".$this->port,$errno,$errstr);
-  if($this->socket === false){
-   return false;
+  $this->socket = array();
+  foreach($this->ports as $port){
+   $this->log->log("Starting server on port: ".$port);
+   $errno = null;
+   $errstr = null;
+   try{
+    $this->socket[$port] = \stream_socket_server("tcp://0.0.0.0:".$port,$errno,$errstr);
+   }
+   catch(\Exception $e){
+    $this->socket = null;
+    $this->log->log("Selhalo vytvareni tcp serveru!");
+    return false;
+   }
   }
   return true;
  }
  private function clientConnect($client_socket){
-  $client_handler = new \Client\Handler($client_socket,$this->vhost_storige,$this->clients,$this->config);
+  $client_handler = new \Client\Handler($client_socket,$this->vhost_storige,$this->error_handler,$this->clients,$this->config);
   $client_handler->start();
   $client_handler->detach();
   $client_handler = null;
  }
  public function handleClients(){
   while(1){
-   $read_streams = array($this->socket,$this->console->getStream());
+   $read_streams = $this->socket;
+   $read_streams[] = $this->console->getStream();
    $write_socket = array();
    $except_socket = array();
-   if(@\stream_select($read_streams, $write_socket, $except_socket, null) === false){
-    return;
-   }
+   @\stream_select($read_streams, $write_socket, $except_socket, null);
    foreach($read_streams as $stream){
     if($stream == $this->console->getStream()){
      $this->console->handleCommand();
@@ -68,18 +74,16 @@ class Server{
      $stream = null;
      continue;
     }
-    if($stream == $this->socket){
-     $client_socket = @\stream_socket_accept($this->socket);
-     if($client_socket === false){
-      $this->log->log("Selhano zpravovani noveho klienta!");
-      $stream = null;
-      continue;
-     }
-     $this->clientConnect($client_socket);
-     $client_socket = null;
+    try{
+     $client_socket = \stream_socket_accept($stream);
+	}
+    catch(\Exception $e){
+     $this->log->log("Handle new client failed!");
      $stream = null;
-     continue;
+	 continue;
     }
+    $this->clientConnect($client_socket);
+    $client_socket = null;
     $stream = null;
    }
    $read_streams = null;
@@ -89,25 +93,18 @@ class Server{
   return $this->log;
  }
  public function stop(){
-  var_dump($this->clients);
-  foreach($this->clients as $client){
-   /*$client_object = new \Client\Client($client);
-   foreach($this->vhost_storige->getAll() as $vhost){
-    $vhost->onClientDisconnect($client_object);
-    $vhost = null;
-   }*/
-   //\socket_close($client);
-  // var_dump("kiknuti: ",$client_object);
-   $client = null;
-   //$client_object = null;
-  }
-  foreach($this->vhost_storige->getAll() as $vhost){
-   $this->vhost_storige->remove($vhost->getName());
-   $vhost = null;
-  }
+  $manipulator = new \Client\Manipulator($this->clients,$this->vhost_storige);
+  $manipulator->start();
+  $manipulator->join();
+  $this->log->log("Exit all Vhosts");
+  $this->vhost_storige->removeAll();
+  $this->log->log("Exit all Plugins");
+  $this->plugin_storige->removeAll();
   if(!is_null($this->socket)){
-   $this->log->log("Vypinam server na portu: ".$this->port);
-   \stream_socket_shutdown($this->socket,STREAM_SHUT_RDWR);
+   foreach($this->socket as $port=>$socker){
+    $this->log->log("Shut down server on port: ".$port);
+    \stream_socket_shutdown($socker,STREAM_SHUT_RDWR);
+   }
    $this->socket = null;
   }
  }

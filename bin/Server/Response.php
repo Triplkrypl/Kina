@@ -5,7 +5,7 @@ class Response{
  private $status_code;
  private $data;
  private $header;
- public function __construct($status_code = 200,\Server\Response\Header $header = null,$data = ""){
+ public function __construct($data = "",$status_code = 200,\Server\Response\Header $header = null){
   $this->status_code = $status_code;
   $this->header = $header;
   $this->data = $data;   

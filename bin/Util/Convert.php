@@ -23,9 +23,13 @@ class Convert{
   }
   return "shit happens";
  }
+ //@todo delete ???
  static public function fileNameToClassName($base_dir,$file_name){
   $file_name = \str_replace($base_dir."/","",$file_name);
   $class_name = \str_replace("/","\\",$file_name);
   return \str_replace(".php","\\",$class_name);
+ }
+ static public function firstCharToUp($string){
+  return strtoupper($string[0]).substr($string,1,strlen($string));
  }
 }
