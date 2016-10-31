@@ -5,7 +5,7 @@ class Config{
  private $default_value;
  public function __construct(){
   $this->default_value = array(
-   "ports" => array(7505,7506),
+   "ports" => array(80),
    "max_connection" => 100000,
    "keep_alive_connection_time_out" => 20,
    "directory_file_list" => false,
@@ -14,6 +14,7 @@ class Config{
    "vhost_map" => array(),
   );
   $this->data = array(
+   "ports" => array(7505,7506),
    "directory_file_list" => true,
    "directory_index" => "ahoj.html",
    "vhost_select" => "self",
