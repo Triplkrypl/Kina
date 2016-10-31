@@ -17,7 +17,7 @@ class PluginStorige{
    if($dir_name == "." || $dir_name == ".."){
     continue;
    }
-   if(\preg_match("/^[A-Z]{1}[a-z0-9]*\$/",$dir_name) == false || is_file($plugin_base_dir."/".$dir_name)){
+   if(\preg_match("/^[A-Z]{1}[a-zA-Z0-9]*\$/",$dir_name) == false || is_file($plugin_base_dir."/".$dir_name)){
     continue;
    }
    if(!is_file($this->class_loader->getPluginBaseDir($this->type)."/".$dir_name."/".$this->type.".php")){

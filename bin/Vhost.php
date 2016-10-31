@@ -1,6 +1,6 @@
 <?php
 abstract class Vhost extends \Plugin{
- final public function getResponseError($http_code){
+ public function getResponseError($http_code){
   $data = "
 <html>
  <body>
@@ -17,14 +17,19 @@ abstract class Vhost extends \Plugin{
  public function onClientDisconnect(\Client\Client $client){
  }
  public function onVhostChoise(\Server\Request $request){
-  return false;
+  if($this->getName() == "Base"){
+   return false;
+  }
+  if(is_null($request->getHost())){
+   return false;
+  }
+  return \Util\Convert::hostToVhostName($host->getHost()) == $this->getName();
  }
  public function onPhpRequest(\Client\Client $client,\Server\Request $request){
   return null;
  }
  public function onNoPhpRequest(\Client\Client $client,\Server\Request $request){
   $static_data_dir = $this->getDataDir()."/static".$request->getUrl();
-  var_dump($static_data_dir);
   if(file_exists($static_data_dir)){
    if(is_file($static_data_dir)){
     return new \Server\Response(200,null,file_get_contents($static_data_dir));
@@ -49,7 +54,7 @@ abstract class Vhost extends \Plugin{
   if($this->getServerConfig()->exists("directory_index")){
    $index = $static_data_dir."/".$this->getServerConfig()->get("directory_index");
    if(is_file($index)){
-    return new \Server\Response(200,null,file_get_contents($index));
+    return new \Server\Response(file_get_contents($index),200,null);
    }
   }
   return null;
@@ -73,6 +78,6 @@ abstract class Vhost extends \Plugin{
   $data .= \implode("\n<br />",$files);
   $data .= " </body>\n";
   $data .= "<html>";
-  return new \Server\Response(200,null,$data);
+  return new \Server\Response($data,200,null);
  }
 }

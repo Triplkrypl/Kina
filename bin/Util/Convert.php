@@ -2,14 +2,23 @@
 namespace Util;
 class Convert{
  static function hostToVhostName($host){
-  if(is_null($host)){
-   return "";
+  $len = strlen($host);
+  $vhost = "";
+  for($i=0; $i<$len; $i++){
+   $ch = $host[$i];
+   if($i == 0){
+    $vhost .= strtoupper($ch);
+    continue;
+   }
+   if($host[$i-1] == "."){
+    $vhost .= strtoupper($ch);
+    continue;
+   }
+   if($host[$i] == "."){
+    continue;
+   }
+   $vhost .= $ch;
   }
-  $pos = \strpos($host,":");
-  if($pos !== false){
-   $host = \substr($host,0,$pos);
-  }
-  $vhost = \preg_replace("/([^a-zA-B0-9]+)/","_",$host);
   return $vhost;
  }
  static public function statusCodeToText($code = 200){

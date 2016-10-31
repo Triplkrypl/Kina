@@ -22,7 +22,21 @@ class Handler extends \Thread{
  public function run(){
   $this->vhost_storige->getClassLoader()->register();
   $this->error_handler->register();
-  \date_default_timezone_set("Europe/Prague");
+  try{
+   \date_default_timezone_set("Europe/Prague");
+   $this->clientConnect();
+   while(1){
+    if($this->handle() == false){
+     break;
+    }
+   }
+   $this->clientDisconnect();
+  }
+  catch(\Exception $e){
+   $this->log->logException("Uncaught exception in client thread",$e,"error");
+  }
+ }
+ private function clientConnect(){
   $this->clients[] = $this->socket;
   foreach($this->vhost_storige->getAll() as $vhost){
    try{
@@ -33,12 +47,6 @@ class Handler extends \Thread{
    }
    $vhost = null;
   }
-  while(1){
-   if($this->handle() == false){
-    break;
-   }
-  }
-  $this->clientDisconnect();
  }
  private function clientDisconnect(){
   foreach($this->vhost_storige->getAll() as $vhost){
@@ -50,7 +58,7 @@ class Handler extends \Thread{
    }
    $vhost = null;
   }
-  foreach($this->clients as $key=>$client){
+  foreach($this->clients as $key=>$client){//todo smazani clienta
    if(new Client($client) == $this->client){
     unset($this->clients[$key]);
     $client = null;
@@ -61,21 +69,44 @@ class Handler extends \Thread{
   \stream_socket_shutdown($this->socket,STREAM_SHUT_RDWR);
  }
  private function selectVhost(\Server\Request $request){
-  if($this->config->get("vhost_self_select")){
-   foreach($this->vhost_storige->getAll() as $vhost){
-    try{
-     $result = $vhost->onVhostChoise($request);
+  switch($this->config->get("vhost_select")){
+   case "self":{
+    foreach($this->vhost_storige->getAll() as $vhost){
+     try{
+      $result = $vhost->onVhostChoise($request);
+     }
+     catch(\Exception $e){
+      $this->log->logException("Plugin ".$vhost->getName()." throw exception from onVhostChoise",$e,"warning");
+      continue;
+	 }
+     if($result){
+      return $vhost;
+     }
     }
-    catch(\Exception $e){
-     $this->log->logException("Plugin ".$vhost->getName()." throw exception from onVhostChoise",$e,"warning");
-     continue;
-	}
-    if($result){
-     return $vhost;
-    }
+    break;
    }
-  }else{
-   //todo!!!!!!!!!!!!!!!add config rule
+   case "auto":{
+    if(!is_null($request->getHost())){
+	 $vhost = $this->vhost_storige->get(\Util\Convert::hostToVhostName($request->getHost()->getHost()));
+	 if(!is_null($vhost)){
+	  return $vhost;
+	 }
+	}
+    break;
+   }
+   case "config":{
+    $rules = $this->config->get("vhost_map");
+    foreach($rules as $regex=>$vhost_name){
+	 if(preg_match($regex,$request->getUrl(true))){
+	  $vhost = $this->vhost_storige->get($vhost_name);
+	  if(!is_null($vhost)){
+	   return $vhost;
+	  }
+	  break;
+	 }
+	}
+    break;
+   }
   }
   return null;
  }
@@ -129,7 +160,11 @@ class Handler extends \Thread{
   if(count($url) == 2){
    $query = $url[1];
   }
-  $request = new \Server\Request($request_info[0],$header->getData("Host"),$url[0],$header,new \Server\Request\Data($query),$body);
+  $host = $header->getData("Host");
+  if(!is_null($host)){
+   $host = new \Server\Request\Host($host);
+  }
+  $request = new \Server\Request($request_info[0],$host,$url[0],$header,new \Server\Request\Data($query),$body);
   $response = $this->handleRequest($request);
   $data = $http_version." ".$response->getStatusCode()." ".\Util\Convert::statusCodeToText($response->getStatusCode())."\r\n";
   $header = $response->getHeader();

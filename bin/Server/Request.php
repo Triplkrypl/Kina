@@ -5,13 +5,13 @@ class Request{
  private $query;
  private $header;
  private $url;
- private $domain;
+ private $host;
  private $methotd;
- public function __construct($methotd,$domain,$url,\Server\Header $header,\Server\Request\Data $query,\Server\Request\Data $body = null){
+ public function __construct($methotd,\Server\Request\Host $host = null,$url,\Server\Header $header,\Server\Request\Data $query,\Server\Request\Data $body = null){
   $this->body = $body;
   $this->query = $query;
   $this->url = $url;
-  $this->domain = $domain;
+  $this->host = $host;
   $this->methotd = $methotd;
   $this->header = $header;
  }
@@ -26,7 +26,7 @@ class Request{
  }
  public function getUrl($full = false){
   if($full){
-   $full_url = $this->domain.$this->url;
+   $full_url = $this->host->getRawHost().$this->url;
    if($this->query->getRawData() != ""){
     $full_url .= "?".$this->query->getRawData();
    }
@@ -37,7 +37,7 @@ class Request{
  public function getHeader(){
   return $this->header;
  }
- public function getDomain(){
-  return $this->domain;
+ public function getHost(){
+  return $this->host;
  }
 }

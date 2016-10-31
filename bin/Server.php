@@ -93,7 +93,7 @@ class Server{
   return $this->log;
  }
  public function stop(){
-  $manipulator = new \Client\Manipulator($this->clients,$this->vhost_storige);
+  $manipulator = new \Client\Manipulator($this->clients);
   $manipulator->start();
   $manipulator->join();
   $this->log->log("Exit all Vhosts");

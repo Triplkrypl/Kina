@@ -10,7 +10,7 @@ class Log{
   echo $format_message;
  }
  public function logException($add_message,\Exception $e,$log_type = "",$plugin = "Kina"){
-  $message = $add_message." ".\get_class($e).": message: ".$e->getMessage()." from file: ".$e->getFile()." line: ".$e->getLine();
+  $message = $add_message." '".\get_class($e)."' message: ".$e->getMessage()." from file: ".$e->getFile()." line: ".$e->getLine();
   $this->log($message,$log_type,$plugin);
  }
 }
