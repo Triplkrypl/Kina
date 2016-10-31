@@ -40,18 +40,20 @@ class PluginStorige{
  private function load($plugin_name){
   $this->log->log("Loading Plugin: ".$plugin_name);
   $main_plugin_class = $plugin_name."\\".$this->type;
-  if(!class_exists($main_plugin_class)){
-   $this->log->log("Plugin not found, class: ".$main_plugin_class." not exists","warning");
+  if(array_key_exists($plugin_name,$this->data)){
+   return true;
+  }
+  try{
+   $plugin = new $main_plugin_class($this->config,$this->data_dir);
+  }
+  catch(\Exception $e){
+   $this->log->logException("Plugin: ".$plugin_name." trow exception while creating",$e,"warning");
    return false;
   }
   if(get_parent_class($main_plugin_class) != $this->type){
    $this->log->log("Plugin not found, class: ".$main_plugin_class." not extend class: ".$this->type,"warning");
    return false;
   }
-  if(array_key_exists($plugin_name,$this->data)){
-   return true;
-  }
-  $plugin = new $main_plugin_class($this->config,$this->data_dir);
   try{
    $plugin->onLoad();
   }
