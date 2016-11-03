@@ -10,17 +10,31 @@ class Server{
  private $vhost_storige;
  private $plugin_storige;
  private $config;
- public function __construct(\Server\Config $config,\Util\ClassLoader $class_loader,\Util\ErrorHandler $error_handler,$data_dir){
-  $this->config = $config;
+ public function __construct($config_file,\Util\ClassLoader $class_loader,\Util\ErrorHandler $error_handler,$data_dir){
+  $create_config_exception = null;
+  $this->config = null;
+  try{
+   $this->config = new \Server\Config($config_file);
+  }
+  catch(\Exception $e){
+   $create_config_exception = $e;
+   $this->config = new \Server\Config();
+  }
+  $this->log = new \Util\Log($this->config);
+  if(!is_null($create_config_exception)){
+   $this->log->log("Failed loading configurations ".$create_config_exception->getMessage(),"error");
+  }
   $this->ports = $this->config->get("ports");
   $this->max_connection = $this->config->get("max_connection");
-  $this->log = new \Util\Log();
   $this->error_handler = $error_handler;
-  $this->vhost_storige = new \Util\PluginStorige($config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_VHOST);
-  $this->plugin_storige = new \Util\PluginStorige($config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_PLUGIN);
+  $this->vhost_storige = new \Util\PluginStorige($this->config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_VHOST);
+  $this->plugin_storige = new \Util\PluginStorige($this->config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_PLUGIN);
   $this->socket = null;
   $this->clients = new \Threaded();
   $this->console = new \Console($this->clients,$this->vhost_storige);
+ }
+ public function isLoadedConfig(){
+  return $this->config->loaded();
  }
  public function loadVhosts(){
   $this->log->log("Loading all Vhosts");
@@ -85,7 +99,7 @@ class Server{
      $client_socket = \stream_socket_accept($stream);
 	}
     catch(\Exception $e){
-     $this->log->log("Handle new client failed!");
+     $this->log->log("Handle new client failed","warning");
      $stream = null;
 	 continue;
     }

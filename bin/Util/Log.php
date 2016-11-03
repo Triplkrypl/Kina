@@ -1,6 +1,8 @@
 <?php
 namespace Util;
 class Log{
+ public function __construct(\Server\Config $config){
+ }
  public function log($message,$log_type = "",$plugin = "Kina"){
   $format_message = "[".(new \DateTime())->format("d-m-Y H:i:s")."] [".$plugin."]";
   if($log_type != ""){
