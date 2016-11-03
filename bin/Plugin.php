@@ -5,6 +5,9 @@ abstract class Plugin{
  private $server_config;
  final public function __construct(\Server\Config $config,\Util\Log $log,$data_dir){
   $this->data_dir = $data_dir."/".$this->getName();
+  if(!is_dir($this->data_dir)){
+   mkdir($this->data_dir,0755);
+  }
   $this->server_config = $config;
   $this->log = $log;
  }
