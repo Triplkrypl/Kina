@@ -44,7 +44,7 @@ class PluginStorige{
    return true;
   }
   try{
-   $plugin = new $main_plugin_class($this->config,$this->data_dir);
+   $plugin = new $main_plugin_class($this->config,$this->log,$this->data_dir);
   }
   catch(\Exception $e){
    $this->log->logException("Plugin: ".$plugin_name." trow exception while creating",$e,"warning");
