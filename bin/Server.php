@@ -36,6 +36,10 @@ class Server{
   $this->plugin_storige->loadAll();
  }
  public function run(){
+  if(count($this->ports) == 0){
+   $this->log->log("Lisener ports are not set","error");
+   return false;
+  }
   $this->socket = array();
   foreach($this->ports as $port){
    $this->log->log("Starting server on port: ".$port);
@@ -46,9 +50,12 @@ class Server{
    }
    catch(\Exception $e){
     $this->socket = null;
-    $this->log->log("Selhalo vytvareni tcp serveru!");
-    return false;
+    $this->log->log("Failed starting server on port: ".$port,"warning");
    }
+  }
+  if(count($this->socket) == 0){
+   $this->log->log("None lisener are successfull started","error");
+   return false;
   }
   return true;
  }
