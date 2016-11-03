@@ -12,13 +12,15 @@ $error_handler->register();
 declare(ticks = 1);
 \pcntl_signal(\SIGTERM,"\Util\Shutdown::shutdown");
 \pcntl_signal(\SIGINT,"\Util\Shutdown::shutdown");
-$config = new \Server\Config();
-$server = new \Server($config,$loader_object,$error_handler,$data_dir);
+$server = new \Server(__DIR__."/config.json",$loader_object,$error_handler,$data_dir);
 \Util\Shutdown::init($server);
-$server->loadPlugins();
-if($server->loadVhosts()){
- if($server->run()){
-  $server->handleClients();
+if($server->isLoadedConfig()){
+ $server->loadPlugins();
+ if($server->loadVhosts()){
+  if($server->run()){
+   $server->handleClients();
+  }
  }
+ $server->stop();
 }
-$server->stop();
+
