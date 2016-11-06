@@ -40,7 +40,7 @@ abstract class Vhost extends \Plugin{
   }
   return null;
  }
- private function getDirectoryContent(\Server\Request $request,$static_data_dir){
+ protected function getDirectoryContent(\Server\Request $request,$static_data_dir){
   $index = $this->getIndexInDirectory($static_data_dir);
   if(!is_null($index)){
    return $index;
@@ -50,7 +50,7 @@ abstract class Vhost extends \Plugin{
   }
   return $this->getResponseError(403);
  }
- private function getIndexInDirectory($static_data_dir){
+ protected function getIndexInDirectory($static_data_dir){
   if($this->getServerConfig()->exists("directory_index")){
    $index = $static_data_dir."/".$this->getServerConfig()->get("directory_index");
    if(is_file($index)){
@@ -59,7 +59,7 @@ abstract class Vhost extends \Plugin{
   }
   return null;
  }
- private function getFileInDirectory(\Server\Request $request,$static_data_dir){
+ protected function getFileInDirectory(\Server\Request $request,$static_data_dir){
   $files = \scandir($static_data_dir);
   unset($files[0]);
   if($request->getUrl() == "/"){
