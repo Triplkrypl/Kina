@@ -37,7 +37,7 @@ class Handler extends \Thread{
   }
  }
  private function clientConnect(){
-  $this->clients[] = $this->socket;
+  $this->clients[$this->client->getIp().":".$this->client->getPort()] = $this->socket;
   foreach($this->vhost_storige->getAll() as $vhost){
    try{
     $vhost->onClientConnect($this->client);
@@ -58,14 +58,7 @@ class Handler extends \Thread{
    }
    $vhost = null;
   }
-  foreach($this->clients as $key=>$client){//todo smazani clienta
-   if(new Client($client) == $this->client){
-    unset($this->clients[$key]);
-    $client = null;
-    break;
-   }
-   $client = null;
-  }
+  unset($this->clients[$this->client->getIp().":".$this->client->getPort()]);
   \stream_socket_shutdown($this->socket,STREAM_SHUT_RDWR);
  }
  private function selectVhost(\Server\Request $request){
