@@ -1,7 +1,7 @@
 <?php
 namespace Util;
 class Convert{
- static function hostToVhostName($host){
+ static public function hostToVhostName($host){
   $len = strlen($host);
   $vhost = "";
   for($i=0; $i<$len; $i++){
@@ -20,6 +20,9 @@ class Convert{
    $vhost .= $ch;
   }
   return $vhost;
+ }
+ static public function checkVersionFormat($string){
+  return \preg_match("/^[0-9]*\.[0-9]*\.[0-9]$/",$string);
  }
  static public function statusCodeToText($code = 200){
   $codes = array(

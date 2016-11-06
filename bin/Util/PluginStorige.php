@@ -9,6 +9,7 @@ class PluginStorige{
  private $log;
  private $class_loader;
  private $type;
+ private $other_storige;
  private function getAllPluginName(){
   $plugin_base_dir = $this->class_loader->getPluginBaseDir($this->type);
   $dir = \opendir($plugin_base_dir);
@@ -55,6 +56,32 @@ class PluginStorige{
    return false;
   }
   try{
+   $all_dependence = $plugin->getDependence();
+  }
+  catch(\Exception $e){
+   $this->log->logException("Plugin: ".$plugin_name." trow exception while geting dependence",$e,"warning");
+   return false;
+  }
+  foreach($all_dependence as $dependence){
+   if($dependence->getName() == $plugin_name){
+    continue;
+   }
+   $dependent_plugin = $this->other_storige->get($dependence->getName());
+   if(is_null($dependent_plugin)){
+    if(!$this->other_storige->load($dependence->getName())){
+	 $this->log->log("Failed load dependence: ".$dependence->getName()." for plugin: ".$plugin->getName(),"warning");
+	 return false;
+	}
+   }
+   $dependent_plugin = $this->other_storige->get($dependence->getName());
+   if(!is_null($dependent_plugin->getVersion()) && !is_null($dependence->getVersion())){
+    if($dependent_plugin->getVersion() != $dependence->getVersion()){
+     $this->log->log("Failed load plugin: ".$plugin_name." dependence: ".$dependence->getName()." have wrong version reguired: ".$dependence->getVersion()." found: ".$dependent_plugin->getVersion());
+	 return false;
+	}
+   }
+  }
+  try{
    $plugin->onLoad();
   }
   catch(\Exception $e){
@@ -64,13 +91,17 @@ class PluginStorige{
   $this->data[$plugin_name] = $plugin;
   return true;
  }
- public function __construct(\Server\Config $config,\Util\Log $log,\Util\ClassLoader $class_loader,$data_dir,$type){
+ public function __construct(\Server\Config $config,\Util\Log $log,\Util\ClassLoader $class_loader,$data_dir,$type,PluginStorige $other_storige = null){
   $this->data = new \Threaded;
   $this->config = $config;
   $this->data_dir = $data_dir;
   $this->log = $log;
   $this->class_loader = $class_loader;
   $this->type = $type;
+  $this->other_storige = $other_storige;
+  if(is_null($other_storige)){
+   $this->other_storige = $this;
+  }
  }
  public function loadAll(){
   if(count($this->data) != 0){
@@ -78,6 +109,9 @@ class PluginStorige{
   }
   $plugin_names = $this->getAllPluginName();
   foreach($plugin_names as $plugin_name){
+   if(array_key_exists($plugin_name,$this->data)){
+    continue;
+   }
    $this->load($plugin_name);
    $plugin_name = null;
   }

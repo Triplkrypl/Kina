@@ -8,6 +8,12 @@ abstract class Plugin{
   if(!is_dir($this->data_dir)){
    mkdir($this->data_dir,0755);
   }
+  $version = $this->getVersion();
+  if(!is_null($version)){
+   if(\Util\Convert::checkVersionFormat($version) == false){
+    throw new \Exception("Plugin version '".$version."' have wrong format example '0.0.0'");
+   }
+  }
   $this->server_config = $config;
   $this->log = $log;
  }
@@ -27,6 +33,12 @@ abstract class Plugin{
  }
  final public function getName(){
   return \preg_replace("/\\\\.*$/","",\get_class($this));
+ }
+ public function getDependence(){
+  return array();
+ }
+ public function getVersion(){
+  return null;
  }
  abstract public function onLoad();
  abstract public function onExit();
