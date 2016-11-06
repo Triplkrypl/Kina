@@ -1,5 +1,5 @@
 <?php
-abstract class Plugin{
+abstract class Plugin extends \Threaded{
  private $data_dir;
  private $log;
  private $server_config;

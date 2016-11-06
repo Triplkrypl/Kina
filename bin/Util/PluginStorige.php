@@ -88,11 +88,11 @@ class PluginStorige{
    $this->log->logException("Plugin trow exception onLoading",$e,"warning");
    return false;
   }
-  $this->data[$plugin_name] = $plugin;
+  $this->data = array($plugin_name => $plugin) + $this->data;
   return true;
  }
  public function __construct(\Server\Config $config,\Util\Log $log,\Util\ClassLoader $class_loader,$data_dir,$type,PluginStorige $other_storige = null){
-  $this->data = new \Threaded;
+  $this->data = array();
   $this->config = $config;
   $this->data_dir = $data_dir;
   $this->log = $log;
