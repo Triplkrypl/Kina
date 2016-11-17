@@ -40,6 +40,6 @@ abstract class Plugin extends \Threaded{
  public function getVersion(){
   return null;
  }
- abstract public function onLoad();
- abstract public function onExit();
+ public function onLoad(){}
+ public function onExit(){}
 }
