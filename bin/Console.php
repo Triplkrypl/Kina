@@ -1,5 +1,5 @@
 <?php
-class Console/* extends Threaded*/{
+class Console{
  private $stream;
  private $stop;
  private $clients;
@@ -27,9 +27,12 @@ class Console/* extends Threaded*/{
  }
  public function handleCommand(){
   $input_string = fgets($this->stream);
-  $command = 'clients';
+  $command = '';
   $params = array();
   $this->parseCommand($input_string,$command,$params);
+  if($command == ''){
+   return;
+  }
   if($command == 'stop'){
    $this->stop = true;
    return;
@@ -41,69 +44,10 @@ class Console/* extends Threaded*/{
      foreach($this->vhost_storige->getAll() as $vhost){
       echo $vhost->getName()."\n";
      }
-     if(count($params) == 3 && $params[2] == 'all'){
-      foreach($this->vhost_storige->getNotLoadedVhostList() as $name){
-       echo $name." (not loaded)\n";
-      }
-     }
-     return;
-    }
-    if($params[1] == 'load'){
-     if(count($params) == 2){
-      echo "Usage vhost load 'vhost name'\n";
-      return;
-     }
-     if(!is_null($this->vhost_storige->get($params[2]))){
-      echo "Vhost: ".$params[2]." allready loaded\n";
-      return;    
-     }
-     $this->vhost_storige->load($params[2]);
-     return;
-    }
-    if($params[1] == 'exit'){
-     if(count($params) == 2){
-      echo "Usage vhost exit 'vhost name'\n";
-      return;
-     }
-     if(is_null($this->vhost_storige->get($params[2]))){
-      echo "Vhost: ".$params[2]." not loaded\n";
-      return;
-     }
-     if($params[2] == "Default"){
-      echo "Default vhost can be only reload\n";
-      return;
-     }
-     $this->vhost_storige->remove($params[2]);
-     return;
-    }
-    if($params[1] == "reload"){
-     if(count($params) == 2){
-      echo "Usage vhost reload 'vhost name'\n";
-      return;
-     }
-     if(is_null($this->vhost_storige->get($params[2]))){
-      echo "Vhost: ".$params[2]." not loaded\n";
-      return;
-     }
-     $this->vhost_storige->remove($params[2]);
-     $this->vhost_storige->load($params[2]);
      return;
     }
    }
-   echo "Usage vhost list|load 'vhost name'|exit 'vhost name'|reload 'vhost_name'|list all\n";
-   return;
-  }
-  if($command == 'clients'){
-   var_dump($this->clients);
-   /*foreach($this->clients as $c){
-    var_dump($c);
-    $c = new \Client\Client($c);
-    var_dump($c);
-    $c = null;
-   }*/
-   return;
-  }
-  if($command == ''){
+   echo "Usage vhost list\n";
    return;
   }
   echo "Command '".$command."' not found\n";
