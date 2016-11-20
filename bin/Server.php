@@ -31,7 +31,7 @@ class Server{
   $this->vhost_storige = new \Util\PluginStorige($this->config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_VHOST,$this->plugin_storige);
   $this->socket = null;
   $this->clients = new \Threaded();
-  $this->console = new \Console($this->clients,$this->vhost_storige);
+  $this->console = new \Console($this->vhost_storige,$this->plugin_storige);
  }
  public function isLoadedConfig(){
   return $this->config->loaded();
