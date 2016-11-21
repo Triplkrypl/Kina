@@ -1,15 +1,16 @@
 <?php
-class Console{
+class Console extends \Threaded{
  private $stream;
  private $stop;
  private $vhost_storige;
+ private $plugin_storige;
+ private $config;
  private $commands;
  private $commands_by_plugins;
- private function parseCommand($text,&$command,&$params){
+ protected function parseCommand($text,&$command,&$params){
   $text = \str_replace("\n","",$text);
   $array = \explode(' ',$text);
-  \reset($array);
-  $command = $array[\key($array)];
+  $command = $array[0];
   foreach($array as $param){
    if($param == ''){
     continue;
@@ -17,64 +18,102 @@ class Console{
    $params[] = $param;
   }
  }
- private function stop($command,array $params,$string){
+ protected function stop($command,array $params,$string){
   $this->stop = true;
  }
- private function vhosts($command,array $params,$string){
+ protected function vhosts($command,array $params,$string){
   echo "Vhosts list:\n";
   foreach($this->vhost_storige->getAll() as $vhost){
    echo " ".$vhost->getName()."\n";
   }
  }
- private function cmdList($command,array $params,$string){
-  echo "Console commands list:\n";
-  foreach($this->commands as $command){
-   echo " ".$command->getname()." ".$command->getDescription()."\n";
+ protected function plugins($command,array $params,$string){
+  echo "Plugins list:\n";
+  foreach($this->plugin_storige->getAll() as $plugin){
+   echo " ".$plugin->getName()."\n";
   }
  }
- public function __construct(\Util\PluginStorige $vhost_storige,\Util\PluginStorige $plugin_storige){
+ protected function cmdList($command,array $params,$string){
+  echo "Console commands list:\n";
+  foreach($this->commands as $command){
+   echo " ".$command->getname().(($command->getDescription() != "") ? ": ".$command->getDescription() : "")."\n";
+  }
+ }
+ public function __construct(\Server\Config $config){
   $this->stream = fopen('php://stdin', 'r');
   $this->stop = false;
-  $this->vhost_storige = $vhost_storige;
+  $this->vhost_storige = null;
+  $this->plugin_storige = null;
+  $this->config = $config;
   $this->commands_by_plugins = array();
   $this->commands = array();
-  $this->addCommand(new \Console\Command("stop",array($this,"stop")));
-  $this->addCommand(new \Console\Command("vhosts",array($this,"vhosts")));
-  $this->addCommand(new \Console\Command("?",array($this,"cmdList")));
+  $this->addCommand(new \Console\Command("stop",$this,"stop","Shutdown server aplication!"));
+  $this->addCommand(new \Console\Command("vhosts",$this,"vhosts","Show list of loaded Vhosts"));
+  $this->addCommand(new \Console\Command("plugins",$this,"plugins","Show list of loaded Plugins"));
+  $this->addCommand(new \Console\Command("?",$this,"cmdList","Show list of all commands"));
+ }
+ public function setStoriges(\Util\PluginStorige $vhost_storige,\Util\PluginStorige $plugin_storige){
+  $this->plugin_storige = $plugin_storige;
+  $this->vhost_storige = $vhost_storige;
  }
  public function getStream(){
   return $this->stream;
  }
- public function addCommand($command,$plugin_name = ""){
-  if(array_key_exists($command->getName(),$this->commands)){
+ public function addCommand(\Console\Command $command,$plugin_name = ""){
+  $this->lock();
+  $commands = $this->commands;
+  $commands_by_plugins = $this->commands_by_plugins;
+  if(array_key_exists($command->getName(),$commands)){
+   $this->unlock();
    throw new \Exception("Console command '".$command->getName()."' allready exists");
   }
-  $this->commands[$command->getName()] = $command;
-  $this->commands_by_plugins[$plugin_name][] = $command->getName();
+  $commands[$command->getName()] = $command;
+  $commands_by_plugins[$plugin_name][] = $command->getName();
+  $this->commands = $commands;
+  $this->commands_by_plugins = $commands_by_plugins;
+  $this->unlock();
  }
  public function removeCommand($command_name,$plugin_name = ""){
-  if(!array_key_exists($command_name,$this->commands)){
+  $this->lock();
+  $commands = $this->commands;
+  $commands_by_plugins = $this->commands_by_plugins;
+  if(!array_key_exists($command_name,$commands)){
+   $this->unlock();
    throw new \Exception("Console command '".$command->getName()."' not found");
   }
-  $keys = array_keys($this->commands_by_plugins[$plugin_name],$command_name);
+  $keys = array_keys($commands_by_plugins[$plugin_name],$command_name);
   if(count($keys) == 0){
+   $this->unlock();
    throw new \Exception("Console command '".$command->getName()."' not belong plugin '".$plugin_name."'");
   }
   $key = $keys[0];
-  unset($this->commands[$command_name]);
-  unset($this->commands_by_plugins[$plugin_name][$key]);
+  unset($commands[$command_name]);
+  unset($commands_by_plugins[$plugin_name][$key]);
+  $this->commands = $commands;
+  $this->commands_by_plugins = $commands_by_plugins;
+  $this->unlock();
  }
  public function removeAllCommands($plugin_name){
-  if(!array_key_exists($plugin_name,$this->commands_by_plugins)){
+  $this->lock();
+  $commands_by_plugins = $this->commands_by_plugins;
+  if(!array_key_exists($plugin_name,$commands_by_plugins)){
+   $this->unlock();
    return;
   }
-  foreach($this->commands_by_plugins[$plugin_name] as $command_name){
-   unset($this->commands[$command_name]);
+  $commands = $this->commands;
+  foreach($commands_by_plugins[$plugin_name] as $command_name){
+   unset($commands[$command_name]);
   }
-  unset($this->commands_by_plugins[$plugin_name]);
+  $this->commands = $commands;
+  unset($commands_by_plugins[$plugin_name]);
+  $this->commands_by_plugins = $commands_by_plugins;
+  $this->unlock();
  }
  public function handleCommand(){
   $input_string = fgets($this->stream);
+  if($this->config->get("console") == false){
+   return;
+  }
   $command = '';
   $params = array();
   $this->parseCommand($input_string,$command,$params);

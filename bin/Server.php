@@ -27,11 +27,11 @@ class Server{
   $this->ports = $this->config->get("ports");
   $this->max_connection = $this->config->get("max_connection");
   $this->error_handler = $error_handler;
-  $this->plugin_storige = new \Util\PluginStorige($this->config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_PLUGIN);
-  $this->vhost_storige = new \Util\PluginStorige($this->config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_VHOST,$this->plugin_storige);
+  $this->console = new \Console($this->config);
+  $this->plugin_storige = new \Util\PluginStorige($this->config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_PLUGIN,$this->console);
+  $this->vhost_storige = new \Util\PluginStorige($this->config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_VHOST,$this->console,$this->plugin_storige);
   $this->socket = null;
   $this->clients = new \Threaded();
-  $this->console = new \Console($this->vhost_storige,$this->plugin_storige);
  }
  public function isLoadedConfig(){
   return $this->config->loaded();
@@ -50,6 +50,7 @@ class Server{
   $this->plugin_storige->loadAll();
  }
  public function run(){
+  $this->console->setStoriges($this->vhost_storige,$this->plugin_storige);
   if(count($this->ports) == 0){
    $this->log->log("Lisener ports are not set","error");
    return false;

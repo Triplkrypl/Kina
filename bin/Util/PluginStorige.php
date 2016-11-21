@@ -10,6 +10,7 @@ class PluginStorige{
  private $class_loader;
  private $type;
  private $other_storige;
+ private $console;
  private function getAllPluginName(){
   $plugin_base_dir = $this->class_loader->getPluginBaseDir($this->type);
   $dir = \opendir($plugin_base_dir);
@@ -36,6 +37,7 @@ class PluginStorige{
   catch(\Exception $e){
    $this->log->logException("Plugin trow exception onExiting",$e,"warning");
   }
+  $this->console->removeAllCommands($plugin->getName());
   unset($this->data[$plugin->getName()]);
  }
  private function load($plugin_name){
@@ -45,7 +47,7 @@ class PluginStorige{
    return true;
   }
   try{
-   $plugin = new $main_plugin_class($this->config,$this->log,$this->data_dir);
+   $plugin = new $main_plugin_class($this->config,$this->log,$this->console,$this->data_dir);
   }
   catch(\Exception $e){
    $this->log->logException("Plugin: ".$plugin_name." trow exception while creating",$e,"warning");
@@ -66,14 +68,18 @@ class PluginStorige{
    if($dependence->getName() == $plugin_name){
     continue;
    }
-   $dependent_plugin = $this->other_storige->get($dependence->getName());
+   $other_storige = $this->other_storige;
+   if(is_null($other_storige)){
+    $other_storige = $this;
+   }
+   $dependent_plugin = $other_storige->get($dependence->getName());
    if(is_null($dependent_plugin)){
-    if(!$this->other_storige->load($dependence->getName())){
+    if(!$other_storige->load($dependence->getName())){
 	 $this->log->log("Failed load dependence: ".$dependence->getName()." for plugin: ".$plugin->getName(),"warning");
 	 return false;
 	}
    }
-   $dependent_plugin = $this->other_storige->get($dependence->getName());
+   $dependent_plugin = $other_storige->get($dependence->getName());
    if(!is_null($dependent_plugin->getVersion()) && !is_null($dependence->getVersion())){
     if($dependent_plugin->getVersion() != $dependence->getVersion()){
      $this->log->log("Failed load plugin: ".$plugin_name." dependence: ".$dependence->getName()." have wrong version reguired: ".$dependence->getVersion()." found: ".$dependent_plugin->getVersion());
@@ -91,7 +97,7 @@ class PluginStorige{
   $this->data = array($plugin_name => $plugin) + $this->data;
   return true;
  }
- public function __construct(\Server\Config $config,\Util\Log $log,\Util\ClassLoader $class_loader,$data_dir,$type,PluginStorige $other_storige = null){
+ public function __construct(\Server\Config $config,Log $log,ClassLoader $class_loader,$data_dir,$type,\Console $console,PluginStorige $other_storige = null){
   $this->data = array();
   $this->config = $config;
   $this->data_dir = $data_dir;
@@ -99,9 +105,7 @@ class PluginStorige{
   $this->class_loader = $class_loader;
   $this->type = $type;
   $this->other_storige = $other_storige;
-  if(is_null($other_storige)){
-   $this->other_storige = $this;
-  }
+  $this->console = $console;
  }
  public function loadAll(){
   if(count($this->data) != 0){
