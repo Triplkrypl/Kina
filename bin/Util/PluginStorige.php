@@ -35,7 +35,7 @@ class PluginStorige{
    $plugin->onExit();
   }
   catch(\Exception $e){
-   $this->log->logException("Plugin trow exception onExiting",$e,"warning");
+   $this->log->logException("Plugin: ".$plugin_name." trow exception onExiting",$e,"warning");
   }
   $this->console->removeAllCommands($plugin->getName());
   unset($this->data[$plugin->getName()]);
@@ -91,7 +91,7 @@ class PluginStorige{
    $plugin->onLoad();
   }
   catch(\Exception $e){
-   $this->log->logException("Plugin trow exception onLoading",$e,"warning");
+   $this->log->logException("Plugin: ".$plugin_name." trow exception onLoading",$e,"warning");
    return false;
   }
   $this->data = array($plugin_name => $plugin) + $this->data;

@@ -10,7 +10,7 @@ class Server{
  private $vhost_storige;
  private $plugin_storige;
  private $config;
- public function __construct($config_file,\Util\ClassLoader $class_loader,\Util\ErrorHandler $error_handler,$data_dir){
+ public function __construct($config_file,\Util\ClassLoader $class_loader,\Util\ErrorHandler $error_handler,$data_dir,$log_dir){
   $create_config_exception = null;
   $this->config = null;
   try{
@@ -20,7 +20,7 @@ class Server{
    $create_config_exception = $e;
    $this->config = new \Server\Config();
   }
-  $this->log = new \Util\Log($this->config);
+  $this->log = new \Util\Log($this->config,$log_dir);
   if(!is_null($create_config_exception)){
    $this->log->log("Failed loading configurations ".$create_config_exception->getMessage(),"error");
   }

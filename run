@@ -12,7 +12,7 @@ $error_handler->register();
 declare(ticks = 1);
 \pcntl_signal(\SIGTERM,"\Util\Shutdown::shutdown");
 \pcntl_signal(\SIGINT,"\Util\Shutdown::shutdown");
-$server = new \Server(__DIR__."/config.json",$loader_object,$error_handler,$data_dir);
+$server = new \Server(__DIR__."/config.json",$loader_object,$error_handler,$data_dir,__DIR__);
 \Util\Shutdown::init($server);
 if($server->isLoadedConfig()){
  $server->loadPlugins();

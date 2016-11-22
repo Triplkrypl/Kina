@@ -3,3 +3,4 @@ data/*
 plugin/*
 !plugin/.gitkeep
 config.json
+log.txt
