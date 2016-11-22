@@ -2,7 +2,6 @@
 <?php
 set_time_limit(0);
 ini_set('memory_limit', '128M');
-date_default_timezone_set("Europe/Prague");
 require_once __DIR__."/bin/Util/ClassLoader.php";
 $data_dir = __DIR__."/data";
 $loader_object = new \Util\ClassLoader(__DIR__."/bin",__DIR__."/plugin");

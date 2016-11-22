@@ -20,6 +20,11 @@ class Server{
    $create_config_exception = $e;
    $this->config = new \Server\Config();
   }
+  try{
+   date_default_timezone_set($this->config->get("default_timezone"));
+  }
+  catch(\Exception $e){
+  }
   $this->log = new \Util\Log($this->config,$log_dir);
   if(!is_null($create_config_exception)){
    $this->log->log("Failed loading configurations ".$create_config_exception->getMessage(),"error");

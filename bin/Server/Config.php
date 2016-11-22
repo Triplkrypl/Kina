@@ -86,6 +86,7 @@ class Config{
    "vhost_select" => "string",
    "vhost_map" => array("object","string"),
    "console" => "bool",
+   "default_timezone" => "string",
   );
   $this->data = array();
   if(is_null($file)){
