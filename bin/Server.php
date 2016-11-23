@@ -32,7 +32,7 @@ class Server{
   $this->ports = $this->config->get("ports");
   $this->max_connection = $this->config->get("max_connection");
   $this->error_handler = $error_handler;
-  $this->console = new \Console($this->config);
+  $this->console = new \Console($this->config,$this->log);
   $this->plugin_storige = new \Util\PluginStorige($this->config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_PLUGIN,$this->console);
   $this->vhost_storige = new \Util\PluginStorige($this->config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_VHOST,$this->console,$this->plugin_storige);
   $this->socket = null;

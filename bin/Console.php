@@ -5,9 +5,10 @@ class Console extends \Threaded{
  private $vhost_storige;
  private $plugin_storige;
  private $config;
+ private $log;
  private $commands;
  private $commands_by_plugins;
- protected function parseCommand($text,&$command,&$params){
+ protected function parseCommand(&$text,&$command,&$params){
   $text = \str_replace("\n","",$text);
   $array = \explode(' ',$text);
   $command = $array[0];
@@ -39,12 +40,13 @@ class Console extends \Threaded{
    echo " ".$command->getname().(($command->getDescription() != "") ? ": ".$command->getDescription() : "")."\n";
   }
  }
- public function __construct(\Server\Config $config){
+ public function __construct(\Server\Config $config,\Util\Log $log){
   $this->stream = fopen('php://stdin', 'r');
   $this->stop = false;
   $this->vhost_storige = null;
   $this->plugin_storige = null;
   $this->config = $config;
+  $this->log = $log;
   $this->commands_by_plugins = array();
   $this->commands = array();
   $this->addCommand(new \Console\Command("stop",$this,"stop","Shutdown server aplication!"));
@@ -122,7 +124,12 @@ class Console extends \Threaded{
   }
   foreach($this->commands as $objects_command){
    if($objects_command->getName() == $command){
-    call_user_func($objects_command->getCallback(),$command,$params,$input_string);
+    try{
+	 call_user_func($objects_command->getCallback(),$command,$params,$input_string);
+	}
+	catch(\Exception $e){
+	 $this->log->logException("Console command: ".$input_string." throw exception",$e,"warning");
+	}
 	return;
    }
   }
