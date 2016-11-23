@@ -47,6 +47,8 @@ not exists.
 
 ```json
 {
+	"#": "Key start with '#' is comment",
+    "#ports": "List of listen TCP ports, default value [80]",
     "ports": [80],
     "#max_connection": "Maximum TCP connection per listen port, default value 100000",
     "max_connection": 100000,
