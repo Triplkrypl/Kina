@@ -42,7 +42,7 @@ Run
 Configuration example
 ---------------------
 
-Server configuration file "config.json" is generated in same folder (for some fanatic "direcoty") as run file if
+Server configuration file "config.json" is generated in same folder (for some fanatic "directory") as run file if
 not exists.
 
 ```json
