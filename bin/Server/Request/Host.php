@@ -4,6 +4,9 @@ class Host{
  private $host_string;
  private $host;
  private $port;
+ /**
+  * @param string $host_string
+  */
  public function __construct($host_string){
   $this->host_string = $host_string;
   $host_array = \explode(":",$host_string);
@@ -13,12 +16,21 @@ class Host{
    $this->port = $host_array[1];
   }
  }
+ /**
+  * @return string
+  */
  public function getHost(){
   return $this->host;
  }
+ /**
+  * @return int
+  */
  public function getPort(){
   return $this->port;
  }
+ /**
+  * @return string
+  */
  public function getRawHost(){
   return $this->host_string;
  }

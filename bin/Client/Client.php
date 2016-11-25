@@ -8,9 +8,15 @@ class Client{
   $this->ip = $name[0];
   $this->port = $name[1];
  }
+ /**
+  * @return string
+  */
  public function getIp(){
   return $this->ip;
  }
+ /**
+  * @return int
+  */
  public function getPort(){
   return $this->port;
  }

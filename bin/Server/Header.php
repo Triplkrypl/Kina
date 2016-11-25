@@ -7,9 +7,16 @@ class Header{
   $this->raw_data = $raw_data;
   $this->indexed_data = null;
  }
+ /**
+  * @return string
+  */
  public function getRawData(){
-  return $this->raw_data;
+  return is_null($this->raw_data) ? "" : $this->raw_data;
  }
+ /**
+  * @param string $index
+  * @return null|string
+  */
  public function getData($index){
   if(is_null($this->indexed_data)){
    $this->parse();
@@ -19,6 +26,9 @@ class Header{
   }
   return null;
  }
+ /**
+  * @return string[]
+  */
  public function getAllData(){
   if(is_null($this->indexed_data)){
    $this->parse();

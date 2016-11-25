@@ -1,5 +1,9 @@
 <?php
 abstract class Vhost extends \Plugin{
+ /**
+  * @param int $http_code
+  * @return \Server\Response
+  */
  public function getResponseError($http_code){
   $data = "
 <html>
@@ -9,13 +13,27 @@ abstract class Vhost extends \Plugin{
 </html>";
   return new \Server\Response($data,$http_code,null);
  }
+ /**
+  * @param \Server\Request $request
+  * @return bool
+  */
  public function onPhpRequestChoice(\Server\Request $request){
   return \preg_match("/.*\.php$/",$request->getUrl());
  }
+ /**
+  * @param \Client\Client $client
+  */
  public function onClientConnect(\Client\Client $client){
  }
+ /**
+  * @param \Client\Client $client
+  */
  public function onClientDisconnect(\Client\Client $client){
  }
+ /**
+  * @param \Server\Request $request
+  * @return bool
+  */
  public function onVhostChoise(\Server\Request $request){
   if($this->getName() == "Base"){
    return false;
@@ -23,16 +41,26 @@ abstract class Vhost extends \Plugin{
   if(is_null($request->getHost())){
    return false;
   }
-  return \Util\Convert::hostToVhostName($host->getHost()) == $this->getName();
+  return \Util\Convert::hostToVhostName($request->getHost()->getHost()) == $this->getName();
  }
+ /**
+  * @param \Client\Client $client
+  * @param \Server\Request $request
+  * @return \Server\Response|null
+  */
  public function onPhpRequest(\Client\Client $client,\Server\Request $request){
   return null;
  }
+ /**
+  * @param \Client\Client $client
+  * @param \Server\Request $request
+  * @return null|\Server\Response
+  */
  public function onNoPhpRequest(\Client\Client $client,\Server\Request $request){
   $static_data_dir = $this->getDataDir()."/static".$request->getUrl();
   if(file_exists($static_data_dir)){
    if(is_file($static_data_dir)){
-    return new \Server\Response(200,null,file_get_contents($static_data_dir));
+    return new \Server\Response(file_get_contents($static_data_dir),200,null);
    }
    if(is_dir($static_data_dir)){
     return $this->getDirectoryContent($request,$static_data_dir);
@@ -40,6 +68,11 @@ abstract class Vhost extends \Plugin{
   }
   return null;
  }
+ /**
+  * @param \Server\Request $request
+  * @param string $static_data_dir
+  * @return null|\Server\Response
+  */
  protected function getDirectoryContent(\Server\Request $request,$static_data_dir){
   $index = $this->getIndexInDirectory($static_data_dir);
   if(!is_null($index)){
@@ -50,6 +83,10 @@ abstract class Vhost extends \Plugin{
   }
   return $this->getResponseError(403);
  }
+ /**
+  * @param string $static_data_dir
+  * @return null|\Server\Response
+  */
  protected function getIndexInDirectory($static_data_dir){
   if($this->getServerConfig()->exists("directory_index")){
    $index = $static_data_dir."/".$this->getServerConfig()->get("directory_index");
@@ -59,6 +96,11 @@ abstract class Vhost extends \Plugin{
   }
   return null;
  }
+ /**
+  * @param \Server\Request $request
+  * @param string $static_data_dir
+  * @return \Server\Response
+  */
  protected function getFileInDirectory(\Server\Request $request,$static_data_dir){
   $files = \scandir($static_data_dir);
   unset($files[0]);

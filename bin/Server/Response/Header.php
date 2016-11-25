@@ -5,14 +5,22 @@ class Header extends \Server\Header{
   $this->raw_data = null;
   $this->indexed_data = array();
  }
+ /**
+  * @param bool $build
+  * @return string
+  */
  public function getRawData($build = false){
   if(is_null($this->raw_data) || $build){
    $this->buildRawData();
   }
   return $this->raw_data;
  }
- public function setData($index,$value){
-  $this->indexed_data[$index] = $value;
+ /**
+  * @param string $key
+  * @param string $value
+  */
+ public function setData($key,$value){
+  $this->indexed_data[$key] = $value;
  }
  private function buildRawData(){
   $this->raw_data = "";
