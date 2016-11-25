@@ -164,7 +164,7 @@ class Handler extends \Thread{
   if(is_null($header)){
    $header = new \Server\Response\Header();
   }
-  $header->setData("Content-Length",$response->getDataLenght());
+  $header->setData("Content-Length",$response->getDataLength());
   $header->setData("Connection","keep-alive");
   $header->setData("Keep-Alive","timeout=".($this->config->get("keep_alive_connection_time_out")*60));
   $data .= $header->getRawData(true);
