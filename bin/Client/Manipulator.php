@@ -12,5 +12,14 @@ class Manipulator extends \Thread{
    $client = null;
   }
   $this->clients->unlock();
+  while(true){
+   \usleep(100);
+   $this->clients->lock();
+   $count = count($this->clients);
+   $this->clients->unlock();
+   if($count == 0){
+    break;
+   }
+  }
  }
 }

@@ -31,6 +31,7 @@ class Handler extends \Thread{
     }
    }
    $this->clientDisconnect();
+   unset($this->clients[$this->client->getIp().":".$this->client->getPort()]);
   }
   catch(\Exception $e){
    $this->log->logException("Uncaught exception in client thread",$e,"error");
@@ -58,7 +59,6 @@ class Handler extends \Thread{
    }
    $vhost = null;
   }
-  unset($this->clients[$this->client->getIp().":".$this->client->getPort()]);
   \stream_socket_shutdown($this->socket,STREAM_SHUT_RDWR);
  }
  private function selectVhost(\Server\Request $request){
