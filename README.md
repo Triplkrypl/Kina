@@ -72,3 +72,49 @@ not exists.
     "default_timezone": "Europe/Prague"
 }
 ```
+
+Creating plugin
+---------------
+
+All plugins code is loaded from plugin dir and class is loaded by "PSR-0" standart,
+You can not it change and if you do not use this standart, you dig your grave,
+kill yourself and bury yourself in afterlife. You can use "require" or "include"
+but it is much worse!
+
+Example basic plugin
+
+```php
+namespace Test; //Namespace define name of plugin
+class Plugin extends \Plugin{ //Main class have to extends "Plugin" class and have to have name "Plugin"
+
+	public function onLoad(){
+	}
+
+	public function onExit(){
+	}
+}
+```
+
+Example Base vhost
+
+```php
+namespace Base; //Vhost with name "Base" have to be defined!
+class Vhost extends \Vhost{ //Main vhost class have same rule as main plugin class, but vhost have more callback and can listen on network
+
+	public function onLoad(){
+	}
+
+	public function onExit(){
+		$this->serverLog("zvladlul jsem ".$this->request." dotazu");
+	}
+
+	/**
+	 * @param \Client\Client $client
+	 * @param \Server\Request $request
+	 * @return \Server\Response|null
+	 */
+	public function onPhpRequest(\Client\Client $client,\Server\Request $request){
+		return null;
+	}
+}
+```
