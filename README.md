@@ -66,6 +66,7 @@ not exists.
     "#vhost_map": ", default value {}",
     "vhost_map": {},
     "#console": "Setup loging messages to console and enable or disable console input, default value true",
+    "#console!": "Setup this option to false if you use './run &' Kina will not try read from broken stream",
     "console": true,
     "#default_timezone": "You can set value for function: date_default_timezone_set if is not set in php.ini, default value not exists",
     "default_timezone": "Europe/Prague"

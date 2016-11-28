@@ -4,7 +4,6 @@ class Console extends \Threaded{
  private $stop;
  private $vhost_storige;
  private $plugin_storige;
- private $config;
  private $log;
  private $commands;
  private $commands_by_plugins;
@@ -40,12 +39,11 @@ class Console extends \Threaded{
    echo " ".$command->getname().(($command->getDescription() != "") ? ": ".$command->getDescription() : "")."\n";
   }
  }
- public function __construct(\Server\Config $config,\Util\Log $log){
+ public function __construct(\Util\Log $log){
   $this->stream = fopen('php://stdin', 'r');
   $this->stop = false;
   $this->vhost_storige = null;
   $this->plugin_storige = null;
-  $this->config = $config;
   $this->log = $log;
   $this->commands_by_plugins = array();
   $this->commands = array();
@@ -113,9 +111,6 @@ class Console extends \Threaded{
  }
  public function handleCommand(){
   $input_string = fgets($this->stream);
-  if($this->config->get("console") == false){
-   return;
-  }
   $command = '';
   $params = array();
   $this->parseCommand($input_string,$command,$params);

@@ -32,7 +32,7 @@ class Server{
   $this->ports = $this->config->get("ports");
   $this->max_connection = $this->config->get("max_connection");
   $this->error_handler = $error_handler;
-  $this->console = new \Console($this->config,$this->log);
+  $this->console = new \Console($this->log);
   $this->plugin_storige = new \Util\PluginStorige($this->config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_PLUGIN,$this->console);
   $this->vhost_storige = new \Util\PluginStorige($this->config,$this->log,$class_loader,$data_dir,\Util\PluginStorige::TYPE_VHOST,$this->console,$this->plugin_storige);
   $this->socket = null;
@@ -88,7 +88,9 @@ class Server{
  public function handleClients(){
   while(1){
    $read_streams = $this->socket;
-   $read_streams[] = $this->console->getStream();
+   if($this->config->get("console")){
+    $read_streams[] = $this->console->getStream();
+   }
    $write_socket = array();
    $except_socket = array();
    @\stream_select($read_streams, $write_socket, $except_socket, null);

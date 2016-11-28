@@ -75,6 +75,7 @@ class Config{
    "#vhost_map" => "Object with regex rules for vhots selection, property name is regex and value is vhost name, default value {}",
    "vhost_map" => array(),
    "#console" => "Setup loging messages to console and enable or disable console input, default value true",
+   "#console!" => "Setup this option to false if you use './run &' Kina will not try read from broken stream",
    "console" => true,
   );
   $this->value_types = array(
