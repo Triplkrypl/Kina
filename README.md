@@ -63,7 +63,7 @@ not exists.
     "#vhost_select2": "auto will transform host name on vhost name",
     "#vhost_select3": "self will call vhost method 'onVhostChoise' if vhost handle request",
     "vhost_select": "config",
-    "#vhost_map": ", default value {}",
+    "#vhost_map" => "Object with regex rules for vhots selection, property name is regex and value is vhost name, default value {}",
     "vhost_map": {},
     "#console": "Setup loging messages to console and enable or disable console input, default value true",
     "#console!": "Setup this option to false if you use './run &' Kina will not try read from broken stream",
@@ -105,7 +105,6 @@ class Vhost extends \Vhost{ //Main vhost class have same rule as main plugin cla
 	}
 
 	public function onExit(){
-		$this->serverLog("zvladlul jsem ".$this->request." dotazu");
 	}
 
 	/**
