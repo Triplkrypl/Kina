@@ -46,8 +46,12 @@ class PluginStorige{
   if(array_key_exists($plugin_name,$this->data)){
    return true;
   }
+  $other_storige = $this->other_storige;
+  if(is_null($other_storige)){
+   $other_storige = $this;
+  }
   try{
-   $plugin = new $main_plugin_class($this->config,$this->log,$this->console,$this->data_dir);
+   $plugin = new $main_plugin_class($this->config,$this->log,$this->console,$other_storige,$this->data_dir);
   }
   catch(\Exception $e){
    $this->log->logException("Plugin: ".$plugin_name." trow exception while creating",$e,"warning");

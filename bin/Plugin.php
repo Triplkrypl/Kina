@@ -4,7 +4,8 @@ abstract class Plugin extends \Threaded{
  private $log;
  private $server_config;
  private $console;
- final public function __construct(\Server\Config $config,\Util\Log $log,\Console $console,$data_dir){
+ private $plugin_storige;
+ final public function __construct(\Server\Config $config,\Util\Log $log,\Console $console,\Util\PluginStorige $plugin_storige,$data_dir){
   $this->data_dir = $data_dir."/".$this->getName();
   if(!is_dir($this->data_dir)){
    mkdir($this->data_dir,0755);
@@ -18,6 +19,7 @@ abstract class Plugin extends \Threaded{
   $this->server_config = $config;
   $this->log = $log;
   $this->console = $console;
+  $this->plugin_storige = $plugin_storige;
  }
  final public function __destruct(){
  }
@@ -63,6 +65,13 @@ abstract class Plugin extends \Threaded{
   */
  final protected function removeCommand($command_name){
   $this->console->removeCommand($command_name,$this->getName());
+ }
+ /**
+  * @param string $plugin_name
+  * @return \Plugin|null
+  */
+ final protected function getPlugin($plugin_name){
+  return $this->plugin_storige->get($plugin_name);
  }
  /**
   * @return string
