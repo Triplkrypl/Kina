@@ -84,6 +84,7 @@ but it is much worse!
 Example basic plugin
 
 ```php
+<?php
 namespace Test; //Namespace define name of plugin
 class Plugin extends \Plugin{ //Main class have to extends "Plugin" class and have to have name "Plugin"
 
@@ -98,6 +99,7 @@ class Plugin extends \Plugin{ //Main class have to extends "Plugin" class and ha
 Example Base vhost
 
 ```php
+<?php
 namespace Base; //Vhost with name "Base" have to be defined!
 class Vhost extends \Vhost{ //Main vhost class have same rule as main plugin class, but vhost have more callback and can listen on network
 
@@ -117,3 +119,9 @@ class Vhost extends \Vhost{ //Main vhost class have same rule as main plugin cla
 	}
 }
 ```
+
+All plugins extends \Threaded class. Method and properties plugin object have diferent behaviors
+than other objects. If you manipulating with big struture store in property of plugin mainly if you
+write into property use methods lock and unlock for create transaction on object. Because with
+plugin objects can working more then one thread if http request is processed.
+Read documentation about pthread library for more informations http://php.net/manual/en/book.pthreads.php.
