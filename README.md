@@ -125,3 +125,19 @@ than other objects. If you manipulating with big struture store in property of p
 write into property use methods lock and unlock for create transaction on object. Because with
 plugin objects can working more then one thread if http request is processed.
 Read documentation about pthread library for more informations http://php.net/manual/en/book.pthreads.php.
+
+Example simple transaction on \Threated object
+
+```php
+
+$this->lock(); //prevent from access to object
+
+$some_object = $this->some_object; //get copy of object into local thread
+
+$some_object->setSomeThing($some_thing);//do some code
+
+$this->some_object = $some_object; //set new data to shared heap for all thread
+
+$this->unlock(); //alow every one read of write
+
+```
