@@ -71,6 +71,9 @@ abstract class Plugin extends \Threaded{
   * @return \Plugin|null
   */
  final protected function getPlugin($plugin_name){
+  if($plugin_name == $this->getName()){
+   throw new \Exception("Hey man. You try get '".$plugin_name."' plugin from '".$this->getName()."' plugin it is useless, please don't do it i want be clever plugin or Kina can be angry.");
+  }
   return $this->plugin_storige->get($plugin_name);
  }
  /**
