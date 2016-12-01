@@ -16,7 +16,7 @@ git clone git@github.com:Triplkrypl/Kina.git
 Dependencies
 ------------
 
-Php interpreter runable as "php" command 
+Php thread save interpreter runable as "php" command
 
 Php pthreads extension
 
@@ -140,4 +140,29 @@ $this->some_object = $some_object; //set new data to shared heap for all thread
 
 $this->unlock(); //alow every one read of write
 
+```
+
+List of callback
+----------------
+
+If you want catch some callback just override default method in \Plugin or \Vhost.
+
+```php
+/**
+ * called in \Plugin,\Vhost, not multi thread
+ * callback is called if server starting and loading all plugins in to memory
+ * you can here inicialized plugin properties, load configuration, ...
+ */
+public function onLoad(){
+}
+```
+
+```php
+/**
+ * called in \Plugin,\Vhost, not multi thread (all childres is dead before this call)
+ * callback is called before plugin dealocation if server stop
+ * you can here store data into file before server aplication end or clean memory and close open connections
+ */
+public function onExit(){
+}
 ```
