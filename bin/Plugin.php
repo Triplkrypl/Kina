@@ -9,6 +9,9 @@ abstract class Plugin extends \Threaded{
   $this->data_dir = $data_dir."/".$this->getName();
   if(!is_dir($this->data_dir)){
    mkdir($this->data_dir,0755);
+   if(\get_parent_class($this) == "Vhost"){
+    mkdir($this->data_dir."/static",0755);
+   }
   }
   $version = $this->getVersion();
   if(!is_null($version)){
