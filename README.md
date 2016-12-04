@@ -142,8 +142,11 @@ $this->unlock(); //alow every one read of write
 
 ```
 
-List of callback
-----------------
+List of server methotds
+-----------------------
+
+List of server callback
+-----------------------
 
 If you want catch some callback just override default method in \Plugin or \Vhost.
 
@@ -153,8 +156,7 @@ If you want catch some callback just override default method in \Plugin or \Vhos
  * callback is called if server starting and loading all plugins in to memory
  * you can here inicialized plugin properties, load configuration, ...
  */
-public function onLoad(){
-}
+public function onLoad();
 ```
 
 ```php
@@ -163,6 +165,88 @@ public function onLoad(){
  * callback is called before plugin dealocation if server stop
  * you can here store data into file before server aplication end or clean memory and close open connections
  */
-public function onExit(){
-}
+public function onExit();
+```
+
+```php
+/**
+ * called in \Plugin,\Vhost, multi thread
+ * callback is called when registered command is input in console
+ *
+ * @param string $command
+ * @param string[] $params
+ * @param string $raw_string
+ */
+public function onConsoleCommand($command,array $params,$raw_string);
+```
+
+```php
+/**
+ * called in \Vhost multi thread
+ * callback is called if new tcp connection is accepted
+ *
+ * @param \Client\Client $client
+ */
+public function onClientConnect(\Client\Client $client);
+```
+
+```php
+/**
+ * called in \Vhost multi thread
+ * callback is called if tcp client disconnet
+ *
+ * @param \Client\Client $client
+ */
+public function onClientDisconnect(\Client\Client $client);
+```
+
+```php
+/**
+ * called in \Vhost multi thread
+ * callback is called if vhost can deside if will handle request or hands over work other vhost
+ * this callback call depends on server config
+ *
+ * @param \Server\Request $request
+ * @return bool
+ */
+public function onVhostChoise(\Server\Request $request);
+```
+
+```php
+/**
+ * called in \Vhost multi thread
+ * callback is called before request submitted for processing
+ * if return true onPhpRequest is called else onNoPhpRequest is called
+ *
+ * @param \Server\Request $request
+ * @return bool
+ */
+public function onPhpRequestChoice(\Server\Request $request);
+```
+
+```php
+/**
+ * called in \Vhost multi thread
+ * callback is called if Vhost mark request as "php" and vhost code have to handle it
+ *
+ * @param \Client\Client $client
+ * @param \Server\Request $request
+ * @return \Server\Response|null
+ */
+public function onPhpRequest(\Client\Client $client,\Server\Request $request);
+```
+
+```php
+/**
+ * called in \Vhost multi thread
+ * callback is called if Vhost mark request as "static" and vhost as default
+ * return file from plugin base folder."/static" this folder is auto
+ * created on first try load vhost
+ * if you do not need change this just put your css, html, js in static folder.
+ *
+ * @param \Client\Client $client
+ * @param \Server\Request $request
+ * @return null|\Server\Response
+ */
+public function onNoPhpRequest(\Client\Client $client,\Server\Request $request);
 ```
