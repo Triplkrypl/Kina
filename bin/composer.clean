@@ -1,0 +1,19 @@
+rm plugin/composer -r
+rm plugin/autoload.php
+
+for f in plugin/*;
+do
+	if [ -d $f ]; then
+		plugin=$(basename $f)
+		if [ -d plugin/$plugin/data ]; then
+			if [ -d data/$plugin ]; then
+				if [ -d data/$plugin/static ]; then
+					rm -r data/$plugin/static
+				fi
+				cp -r plugin/$plugin/data/static data/$plugin/static
+			else
+				cp -r plugin/$plugin/data data/$plugin
+			fi
+		fi
+	fi
+done;

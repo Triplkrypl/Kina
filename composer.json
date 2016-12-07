@@ -1,0 +1,13 @@
+{
+	"config": {
+        "vendor-dir": "plugin"
+    },
+    "scripts": {
+		"post-update-cmd": [
+			"./bin/composer.clean"
+		],
+		"post-install-cmd": [
+			"./bin/composer.clean"
+		]
+	}
+}
