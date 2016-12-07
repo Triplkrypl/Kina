@@ -76,7 +76,7 @@ not exists.
 Creating plugin
 ---------------
 
-All plugins code is loaded from plugin dir and class is loaded by "PSR-0" standart,
+All plugins code is loaded from plugin folder and class is loaded by "PSR-0" standart,
 You can not it change and if you do not use this standart, you dig your grave,
 kill yourself and bury yourself in afterlife. You can use "require" or "include"
 but it is much worse!
@@ -142,10 +142,164 @@ $this->unlock(); //alow every one read of write
 
 ```
 
-List of server methotds
+List of plugin methotds
 -----------------------
 
-List of server callback
+This methotds alow you change or get some data in aplication. Mainly are final and can not be changed.
+
+```php
+/**
+ * available in \Plugin,\Vhost
+ * methotd alow you write row in to server log file
+ *
+ * @param string $message
+ * @param string $log_type
+ */
+final protected function serverLog($message,$log_type = "");
+```
+
+```php
+/**
+ * available in \Plugin,\Vhost
+ * methotd will log exception into server log file as one row, you can add some message before exception message
+ * 
+ * @param string $add_message
+ * @param \Exception $e
+ * @param string $log_type
+ */
+final protected function serverLogException($add_message,\Exception $e,$log_type = "");
+```
+
+```php
+/**
+ * available in \Plugin,\Vhost
+ * methotd provides object with server configuration
+ * 
+ * @return \Server\Config
+ */
+final protected function getServerConfig();
+```
+
+```php
+/**
+ * available in \Plugin,\Vhost
+ * return apsolute path where plugin can store own files, this folder is auto created in data folder  
+ * 
+ * @return string
+ */
+final protected function getDataDir();
+```
+
+```php
+/**
+ * available in \Plugin,\Vhost
+ * method return insatnce of loaded plugin in server by name, this method will not return Vhost 
+ *
+ * @param string $plugin_name
+ * @return \Plugin|null
+ */
+final protected function getPlugin($plugin_name);
+```
+
+```php
+/**
+ * available in \Plugin,\Vhost
+ * method set plugins which haveto successfull load before this plugin
+ * vhost can be dependent on plugin but on vhost no one can be dependent 
+ *
+ * @return \Plugin\Dependence[]
+ */
+public function getDependence();
+```
+
+```php
+/**
+ * available in \Plugin,\Vhost in vhost is useless, but extends is extends
+ * you can say server application version of your plugin and version dependence on this plugin will work
+ * version string example "0.0.0" 
+ *
+ * @return null|string
+ */
+public function getVersion();
+```
+
+```php
+/**
+ * available in \Vhost
+ * method format http status code and define how status code look like in http data
+ *
+ * @param int $http_code
+ * @return \Server\Response
+ */
+public function getResponseError($http_code);
+```
+
+```php
+/**
+ * available in \Vhost
+ * method called in default onNoPhpRequest if requested path is folder
+ *
+ * @param \Server\Request $request
+ * @param string $static_data_dir
+ * @return null|\Server\Response
+ */
+protected function getDirectoryContent(\Server\Request $request,$static_data_dir);
+```
+
+```php
+/**
+ * available in \Vhost
+ * method called in default getDirectoryContent return response with formated list of file and folder 
+ * 
+ * @param \Server\Request $request
+ * @param string $static_data_dir
+ * @return \Server\Response
+ */
+protected function getFileInDirectory(\Server\Request $request,$static_data_dir);
+```
+
+```php
+/**
+ * available in \Vhost
+ * metohod called in default getDirectoryContent return response with folder index file
+ *  
+ * @param string $static_data_dir
+ * @return null|\Server\Response
+ */
+protected function getIndexInDirectory($static_data_dir);
+```
+
+```php
+/**
+ * available in \Plugin,\Vhost
+ * if you want use some console comand you have to reqistred it
+ *
+ * @param \Console\Command $command
+ */
+final protected function registerCommand(\Console\Command $command);
+```
+
+```php
+/**
+ * available in \Plugin,\Vhost
+ * method remove command from server application 
+ * 
+ * @param string $command_name
+ */
+final protected function removeCommand($command_name);
+```
+
+```php
+/**
+ * available in \Plugin,\Vhost
+ * return name of plugin 
+ *
+ * @return string
+ */
+final public function getName();
+```
+
+List of plugin callback
 -----------------------
 
 If you want catch some callback just override default method in \Plugin or \Vhost.
