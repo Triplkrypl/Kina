@@ -193,7 +193,7 @@ final protected function getDataDir();
 ```php
 /**
  * available in \Plugin,\Vhost
- * method return insatnce of loaded plugin in server by name, this method will not return Vhost 
+ * method return instance of loaded plugin in server by name, this method will not return Vhost 
  *
  * @param string $plugin_name
  * @return \Plugin|null
