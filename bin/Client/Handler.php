@@ -23,7 +23,11 @@ class Handler extends \Thread{
   $this->vhost_storige->getClassLoader()->register();
   $this->error_handler->register();
   try{
-   \date_default_timezone_set("Europe/Prague");
+   try{
+    date_default_timezone_set($this->config->get("default_timezone"));
+   }
+   catch(\Exception $e){
+   }
    $this->clientConnect();
    while(1){
     if($this->handle() == false){
