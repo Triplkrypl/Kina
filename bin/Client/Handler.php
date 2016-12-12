@@ -64,6 +64,7 @@ class Handler extends \Thread{
    $vhost = null;
   }
   \stream_socket_shutdown($this->socket,STREAM_SHUT_RDWR);
+  \fclose($this->socket);
  }
  private function selectVhost(\Server\Request $request){
   switch($this->config->get("vhost_select")){
