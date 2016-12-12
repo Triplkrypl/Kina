@@ -123,7 +123,7 @@ class Server{
   return $this->log;
  }
  public function stop(){
-  $manipulator = new \Client\Manipulator($this->clients);
+  $manipulator = new \Client\Manipulator($this->clients,$this->error_handler);
   $manipulator->start();
   $manipulator->join();
   $this->log->log("Exit all Vhosts");
@@ -131,9 +131,10 @@ class Server{
   $this->log->log("Exit all Plugins");
   $this->plugin_storige->removeAll();
   if(!is_null($this->socket)){
-   foreach($this->socket as $port=>$socker){
+   foreach($this->socket as $port=>$socket){
     $this->log->log("Shut down server on port: ".$port);
-    \stream_socket_shutdown($socker,STREAM_SHUT_RDWR);
+    \stream_socket_shutdown($socket,STREAM_SHUT_RDWR);
+    \fclose($socket);
    }
    $this->socket = null;
   }
