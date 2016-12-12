@@ -4,6 +4,14 @@ Kina
 Kina is simple multithreaded web server with plugin support, which always keep
 alive tcp connection and wait until client say goodbye.
 
+Best way to use Kina is for fast sending small HTTP response, she now can not send response
+which is to big for ram, because you have to return response at once and implementation of
+HTTP protocol is basic.
+
+I try make Kina was for best performence and stable, but she can have some mistakes.
+I be glad, if someone found bug help me fix it, but if you do not understand multitread
+programing or socket handling, please do not push fork button.
+
 Install
 -------
 
