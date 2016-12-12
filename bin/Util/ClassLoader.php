@@ -3,6 +3,8 @@ namespace Util;
 class ClassLoader{
  private $base_dir;
  private $plugin_base_dir;
+ private $in_thread;
+ private $in_thread_loaded_class;
  private function disableCompetitor(){
   $competitors = spl_autoload_functions();
   foreach($competitors as $autoloader){
@@ -29,6 +31,36 @@ class ClassLoader{
   if(!\class_exists($class_name)){
    throw new \Exception("Class: ".$class_name." not define in file: ".$file);
   }
+  if($this->in_thread){
+   $this->in_thread_loaded_class->lock();
+   $found = false;
+   foreach($this->in_thread_loaded_class as $value){
+    if($value == $class_name){
+     $found = true;
+	 break;
+	}
+   }
+   if(!$found){
+    $this->in_thread_loaded_class[] = $class_name;
+   }
+   $this->in_thread_loaded_class->unlock();
+  }
+ }
+ public function __construct($base_dir,$plugin_base_dirs){
+  $this->base_dir = $base_dir;
+  $this->plugin_base_dir = $plugin_base_dirs;
+  $this->in_thread = false;
+  $this->in_thread_loaded_class = new \Threaded();
+ }
+ public function loadInMainThreadClassFromChildrens(){
+  if(!$this->in_thread){
+   $this->in_thread_loaded_class->lock();
+   foreach($this->in_thread_loaded_class as $key=>$class_name){
+    $this->loadClass($class_name);
+    unset($this->in_thread_loaded_class[$key]);
+   }
+   $this->in_thread_loaded_class->unlock();
+  }
  }
  public function loadClass($class_name){
   $this->disableCompetitor();
@@ -45,11 +77,8 @@ class ClassLoader{
   }
   throw new \Exception("File not found for class: ".$class_name);
  }
- public function __construct($base_dir,$plugin_base_dirs){
-  $this->base_dir = $base_dir;
-  $this->plugin_base_dir = $plugin_base_dirs;
- }
- public function register(){
+ public function register($in_thread = false){
+  $this->in_thread = $in_thread;
   \spl_autoload_register(array($this,"loadClass"));
  }
  public function getPluginBaseDir(){

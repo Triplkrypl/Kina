@@ -20,9 +20,9 @@ class Handler extends \Thread{
  public function __destruct(){
  }
  public function run(){
-  $this->vhost_storige->getClassLoader()->register();
-  $this->error_handler->register();
   try{
+   $this->vhost_storige->getClassLoader()->register(true);
+   $this->error_handler->register();
    try{
     date_default_timezone_set($this->config->get("default_timezone"));
    }
@@ -35,10 +35,11 @@ class Handler extends \Thread{
     }
    }
    $this->clientDisconnect();
-   unset($this->clients[$this->client->getIp().":".$this->client->getPort()]);
   }
   catch(\Exception $e){
    $this->log->logException("Uncaught exception in client thread",$e,"error");
+   \fclose($this->socket);
+   unset($this->clients[$this->client->getIp().":".$this->client->getPort()]);
   }
  }
  private function clientConnect(){
@@ -65,6 +66,7 @@ class Handler extends \Thread{
   }
   \stream_socket_shutdown($this->socket,STREAM_SHUT_RDWR);
   \fclose($this->socket);
+  unset($this->clients[$this->client->getIp().":".$this->client->getPort()]);
  }
  private function selectVhost(\Server\Request $request){
   switch($this->config->get("vhost_select")){

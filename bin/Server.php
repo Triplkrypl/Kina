@@ -80,6 +80,7 @@ class Server{
   return true;
  }
  private function clientConnect($client_socket){
+  $this->plugin_storige->getClassLoader()->loadInMainThreadClassFromChildrens();
   $client_handler = new \Client\Handler($client_socket,$this->vhost_storige,$this->error_handler,$this->clients,$this->config,$this->log);
   $client_handler->start();
   $client_handler->detach();
