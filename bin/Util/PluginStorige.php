@@ -27,6 +27,7 @@ class PluginStorige{
    }
    $names[] = $dir_name;
   }
+  \closedir($dir);
   return $names;
  }
  private function remove(\Plugin $plugin){
