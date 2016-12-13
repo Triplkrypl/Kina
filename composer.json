@@ -9,5 +9,14 @@
 		"post-install-cmd": [
 			"./bin/composer.clean"
 		]
-	}
+	},
+	"repositories":[
+        {
+            "type": "vcs",
+            "url": "git@github.com:Triplkrypl/Kina-Base-Vhost.git"
+        }
+    ],
+    "require":{
+        "Base":"*"
+    }
 }

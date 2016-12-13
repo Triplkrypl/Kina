@@ -21,6 +21,14 @@ Development version
 git clone git@github.com:Triplkrypl/Kina.git
 ```
 
+Kina have composer support for instaling plugins, more information
+here: https://github.com/Triplkrypl/Kina-Base-Vhost.
+After download Kina you can install test Base Vhost.
+
+```console
+composer install
+```
+
 Dependencies
 ------------
 
