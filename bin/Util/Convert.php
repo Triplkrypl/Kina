@@ -45,4 +45,22 @@ class Convert{
  static public function firstCharToUp($string){
   return strtoupper($string[0]).substr($string,1,strlen($string));
  }
+ static public function isPathOutRoot($path){
+  $up = 0; $down = 0;
+  $part = explode("/",$path);
+  foreach($part as $dir_name){
+   if($dir_name == ""){
+    continue;
+   }
+   if($dir_name == ".."){
+    $up++;
+    continue;
+   }
+   $down++;
+  }
+  if($up > $down){
+   return true;
+  }
+  return false;
+ }
 }

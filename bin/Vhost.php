@@ -57,6 +57,9 @@ abstract class Vhost extends \Plugin{
   * @return null|\Server\Response
   */
  public function onNoPhpRequest(\Client\Client $client,\Server\Request $request){
+  if(\Util\Convert::isPathOutRoot($request->getUrl())){
+   return $this->getResponseError(403);
+  }
   $static_data_dir = $this->getDataDir()."/static".$request->getUrl();
   if(file_exists($static_data_dir)){
    if(is_file($static_data_dir)){
