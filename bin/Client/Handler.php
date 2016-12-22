@@ -23,6 +23,7 @@ class Handler extends \Thread{
   try{
    $this->vhost_storige->getClassLoader()->register(true);
    $this->error_handler->register();
+   $this->error_handler->registerShutdown($this->log,$this->socket,$this->clients,$this->client);
    try{
     date_default_timezone_set($this->config->get("default_timezone"));
    }

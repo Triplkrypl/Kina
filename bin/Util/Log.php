@@ -7,13 +7,13 @@ class Log{
   $this->config = $config;
   $this->log_file = $log_dir."/log.txt";
  }
- public function log($message,$log_type = "",$plugin = "Kina"){
+ public function log($message,$log_type = "",$plugin = "Kina",$only_file = false){
   $format_message = "[".(new \DateTime())->format("d-m-Y H:i:s")."] [".$plugin."]";
   if($log_type != ""){
    $format_message .= " [".$log_type."]";
   }
   $format_message .= " ".$message."\n";
-  if($this->config->get("console")){
+  if($this->config->get("console") && $only_file == false){
    echo $format_message;
   }
   $file = \fopen($this->log_file,"a");
