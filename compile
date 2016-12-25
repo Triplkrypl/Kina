@@ -1,0 +1,28 @@
+#!/usr/bin/env php
+<?php
+function compileFile($path,$file){
+ $code = file_get_contents($path."/".$file);
+ if(preg_match("/<\?php/",$code)){
+  $code = \php_strip_whitespace($path."/".$file);
+  \file_put_contents($path."/".$file,$code);
+ }
+}
+function compileDir($main_path,$path = ""){
+ $dir = opendir($main_path.$path);
+ while($file = readdir($dir)){
+  if($file == "." || $file == ".."){
+   continue;
+  }
+  if(is_file($main_path.$path."/".$file)){
+   \compileFile($main_path.$path,$file);
+   continue;
+  }
+  if(is_dir($main_path.$path."/".$file)){
+   compileDir($main_path,$path."/".$file);
+   continue;
+  }
+ }
+ closedir($dir);
+}
+\compileFile(__DIR__,"run");
+\compileDir(__DIR__."/bin");
