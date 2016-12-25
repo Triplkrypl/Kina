@@ -97,12 +97,21 @@ class Config{
   $this->data["version"] = "1.0.0";
   $this->loaded = true;
  }
+ /**
+  * @param string $key
+  * @return bool
+  */
  public function exists($key){
   return (\array_key_exists($key,$this->data) || \array_key_exists($key,$this->default_value));
  }
  public function loaded(){
   return $this->loaded;
  }
+ /**
+  * @param string $key
+  * @return mixed
+  * @throws \Exception
+  */
  public function get($key){
   if(array_key_exists($key,$this->data)){
    return $this->data[$key];
