@@ -20,8 +20,12 @@ class ErrorHandler{
    }
    catch(\Exception $e){
    }
-   \fclose($this->socket);
-    unset($this->clients[$this->client->getIp().":".$this->client->getPort()]);
+   try{
+    \fclose($this->socket);
+   }
+   catch(\Exception $e){
+   }
+   unset($this->clients[$this->client->getIp().":".$this->client->getPort()]);
   }
  }
  public function register(){

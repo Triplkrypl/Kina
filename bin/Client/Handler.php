@@ -39,7 +39,7 @@ class Handler extends \Thread{
   }
   catch(\Exception $e){
    $this->log->logException("Uncaught exception in client thread",$e,"error");
-   \fclose($this->socket);
+   $this->closeConnection();
    unset($this->clients[$this->client->getIp().":".$this->client->getPort()]);
   }
  }
@@ -65,9 +65,20 @@ class Handler extends \Thread{
    }
    $vhost = null;
   }
-  \stream_socket_shutdown($this->socket,STREAM_SHUT_RDWR);
-  \fclose($this->socket);
+  $this->closeConnection();
   unset($this->clients[$this->client->getIp().":".$this->client->getPort()]);
+ }
+ private function closeConnection(){
+  try{
+   \stream_socket_shutdown($this->socket,STREAM_SHUT_RDWR);
+  }
+  catch(\Exception $e){
+  }
+  try{
+   \fclose($this->socket);
+  }
+  catch(\Exception $e){
+  }
  }
  private function selectVhost(\Server\Request $request){
   switch($this->config->get("vhost_select")){
@@ -194,7 +205,12 @@ class Handler extends \Thread{
     $data_read = 1000;
    }
    if($data_read != 0){
-    $data = @\fread($this->socket,$data_read);
+    try{
+    $data = \fread($this->socket,$data_read);
+    }
+    catch(\Exception $e){
+	 return false;
+	}
     if(strlen($data) == 0){
      return false;
     }
@@ -213,7 +229,12 @@ class Handler extends \Thread{
  private function getHttpHeader(&$request_info,&$header,&$temp_message){
   $temp_message = "";
   while(1){
-   $data = @\fread($this->socket,1000);
+   try{
+    $data = \fread($this->socket,1000);
+   }
+   catch(\Exception $e){
+    return false;
+   }
    if(strlen($data) == 0){
     return false;
    }
