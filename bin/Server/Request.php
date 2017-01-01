@@ -54,7 +54,7 @@ class Request{
   return $this->header;
  }
  /**
-  * @return \Server\Request\Host
+  * @return \Server\Request\Host|null
   */
  public function getHost(){
   return $this->host;
