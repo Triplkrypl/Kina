@@ -165,8 +165,14 @@ class Handler extends \Thread{
   }
   $temp_message = null;
   $request_info = explode(" ",$request_info);
-  $http_version = $request_info[2];
-  $url = $request_info[1];
+  $http_version = "";
+  if(array_key_exists(2,$request_info)){
+   $http_version = $request_info[2];
+  }
+  $url = "";
+  if(array_key_exists(1,$request_info)){
+   $url = $request_info[1];
+  }
   $url = \explode("?",$url);
   $query = "";
   if(count($url) == 2){
