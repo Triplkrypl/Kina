@@ -154,7 +154,7 @@ $some_object->setSomeThing($some_thing);//do some code
 
 $this->some_object = $some_object; //set new data to shared heap for all thread
 
-$this->unlock(); //alow every one read of write
+$this->unlock(); //alow every one read or write
 
 ```
 
