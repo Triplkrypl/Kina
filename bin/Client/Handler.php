@@ -185,22 +185,27 @@ class Handler extends \Thread{
   $request = new \Server\Request($request_info[0],$host,$url[0],$header,new \Server\Request\Data($query),$body);
   $response = $this->handleRequest($request);
   $data = $http_version." ".$response->getStatusCode()." ".\Util\Convert::statusCodeToText($response->getStatusCode())."\r\n";
-  $header = $response->getHeader();
-  if(is_null($header)){
-   $header = new \Server\Response\Header();
+  $responseHeader = $response->getHeader();
+  if(is_null($responseHeader)){
+   $responseHeader = new \Server\Response\Header();
   }
-  $header->setData("Server","Kina/".$this->config->get("version"));
-  $header->setData("Content-Length",$response->getDataLength());
-  $header->setData("Connection","keep-alive");
-  $header->setData("Keep-Alive","timeout=".($this->config->get("keep_alive_connection_time_out")*60));
-  $data .= $header->getRawData(true);
+  $responseHeader->setData("Server","Kina/".$this->config->get("version"));
+  $responseHeader->setData("Content-Length",$response->getDataLength());
+  if(is_null($header->getData("Connection")) || $header->getData("Connection") != "close"){
+   $responseHeader->setData("Connection","keep-alive");
+   $responseHeader->setData("Keep-Alive","timeout=".($this->config->get("keep_alive_connection_time_out")*60));
+  }
+  $data .= $responseHeader->getRawData(true);
   $data .= $response->getData();
   \fwrite($this->socket,$data,strlen($data));
   $response = null;
   $request = null;
-  $header = null;
   $body = null;
   $data = null;
+  if(!is_null($header->getData("Connection")) && $header->getData("Connection") == "close"){
+   return false;
+  }
+  $header = null;
   return true;
  }
  private function getHttpBody(\Server\Header $header,\Server\Request\Data &$body = null,&$temp_message){
